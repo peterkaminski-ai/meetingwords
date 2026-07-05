@@ -21,14 +21,18 @@ export type InstanceInfo = {
   software: { name: string; version: string; url: string };
   /** Optional operator notice (INSTANCE_BANNER_MD), rendered + sanitized. */
   bannerHtml: string | null;
+  /** Front-desk base URL (FRONTDESK_URL): "" = same origin, null = no front desk. */
+  frontdeskUrl: string | null;
 };
 
 export function instanceInfo(env: Env): InstanceInfo {
   const name = (env.INSTANCE_NAME || "").trim() || SOFTWARE_NAME;
+  const frontdesk = (env.FRONTDESK_URL || "").trim();
   return {
     name,
     branded: name !== SOFTWARE_NAME,
     software: { name: SOFTWARE_NAME, version: SOFTWARE_VERSION, url: SOFTWARE_URL },
     bannerHtml: env.INSTANCE_BANNER_MD ? renderMarkdown(env.INSTANCE_BANNER_MD) : null,
+    frontdeskUrl: frontdesk ? frontdesk.replace(/\/+$/, "") : null,
   };
 }

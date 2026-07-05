@@ -43,6 +43,7 @@ async function boot() {
   }
   guestName = viewer.guestName;
   updateNameUi();
+  initSaveRibbon(instance);
 
   if (access === "edit") {
     if (!guestName) await askName();
@@ -54,6 +55,39 @@ async function boot() {
     document.getElementById("toggle-comments").classList.remove("hidden");
     drawThreads();
   }
+}
+
+// The save ribbon exists only where a front desk does (frontdeskUrl: "" =
+// same origin, a string = its base URL, null = none). The POST goes to the
+// front desk, not this instance — the core never sees the email.
+function initSaveRibbon(instance) {
+  const base = instance?.frontdeskUrl;
+  if (base === null || base === undefined) return;
+  if (sessionStorage.getItem(`mw-save-dismissed:${shareId}`)) return;
+  const ribbon = document.getElementById("save-ribbon");
+  const form = document.getElementById("save-form");
+  ribbon.hidden = false;
+  document.getElementById("save-dismiss").addEventListener("click", () => {
+    sessionStorage.setItem(`mw-save-dismissed:${shareId}`, "1");
+    ribbon.hidden = true;
+  });
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = document.getElementById("save-email").value.trim();
+    if (!email) return;
+    try {
+      const response = await fetch(`${base}/desk/save`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email, shareId }),
+      });
+      if (!response.ok) throw new Error(String(response.status));
+      form.classList.add("hidden");
+      document.getElementById("save-sent").classList.remove("hidden");
+    } catch {
+      alert(t("save.error"));
+    }
+  });
 }
 
 function setTitle(title) {

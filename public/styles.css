@@ -532,3 +532,18 @@ dialog::backdrop { background: var(--backdrop); }
   border-bottom: 1px solid color-mix(in srgb, var(--accent, #4f8cff) 25%, transparent);
 }
 .instance-banner p { margin: 4px 0; }
+
+.save-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  background: color-mix(in srgb, var(--accent, #4f8cff) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent, #4f8cff) 20%, transparent);
+}
+.save-ribbon form { display: flex; align-items: center; gap: 10px; flex: 1; flex-wrap: wrap; margin: 0; }
+.save-ribbon .save-prompt { flex: none; }
+.save-ribbon input[type="email"] { max-width: 240px; padding: 4px 8px; font-size: 13px; }
+.save-ribbon button.primary { padding: 4px 10px; font-size: 13px; width: auto; }
+.save-ribbon .save-dismiss { flex: none; }

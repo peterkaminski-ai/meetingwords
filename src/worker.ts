@@ -249,7 +249,7 @@ app.get("/api/viewer", async (c) => {
 });
 
 app.post("/api/auth/setup", async (c) => {
-  if (await authConfigured(c.env)) return c.json({ ok: false, error: "Password already configured." }, 400);
+  if (await authConfigured(c.env)) return c.json({ ok: false, error: "Passphrase already configured." }, 400);
   const body = await c.req.json<{ password?: string; confirmPassword?: string; setupToken?: string }>();
   if ((await setupTokenRequired(c.env)) && !(await verifySetupToken(c.env, String(body.setupToken || "")))) {
     return c.json({ ok: false, error: "Setup token required.", hint: "This instance was provisioned with a setup token; use the setup link you were given." }, 403);
@@ -257,7 +257,7 @@ app.post("/api/auth/setup", async (c) => {
   const password = String(body.password || "");
   if (password.length < 8) return c.json({ ok: false, error: "Use at least 8 characters." }, 400);
   if (password !== String(body.confirmPassword || "")) {
-    return c.json({ ok: false, error: "Passwords do not match." }, 400);
+    return c.json({ ok: false, error: "Passphrases do not match." }, 400);
   }
   await registryStub(c.env).settingsPut("password", await hashPassword(password));
   await registryStub(c.env).settingsDelete("setup_token_hash");
@@ -271,11 +271,11 @@ app.post("/api/auth/login", async (c) => {
   const locked = await checkPasswordThrottle(c);
   if (locked) return locked;
   const stored = await registryStub(c.env).settingsGet("password");
-  if (!stored) return c.json({ ok: false, error: "Password is not configured yet." }, 400);
+  if (!stored) return c.json({ ok: false, error: "Passphrase is not configured yet." }, 400);
   const body = await c.req.json<{ password?: string }>();
   if (!(await verifyPassword(String(body.password || ""), stored))) {
     await recordPasswordFailure(c);
-    return c.json({ ok: false, error: "Wrong password." }, 401);
+    return c.json({ ok: false, error: "Wrong passphrase." }, 401);
   }
   await clearPasswordThrottle(c);
   const token = await issueDeviceToken(c.env);
@@ -291,11 +291,11 @@ app.post("/api/auth/password", async (c) => {
   const locked = await checkPasswordThrottle(c);
   if (locked) return locked;
   const stored = await registryStub(c.env).settingsGet("password");
-  if (!stored) return c.json({ ok: false, error: "Password is not configured yet." }, 400);
+  if (!stored) return c.json({ ok: false, error: "Passphrase is not configured yet." }, 400);
   const body = await c.req.json<{ currentPassword?: string; newPassword?: string }>();
   if (!(await verifyPassword(String(body.currentPassword || ""), stored))) {
     await recordPasswordFailure(c);
-    return c.json({ ok: false, error: "Wrong password." }, 401);
+    return c.json({ ok: false, error: "Wrong passphrase." }, 401);
   }
   await clearPasswordThrottle(c);
   const newPassword = String(body.newPassword || "");

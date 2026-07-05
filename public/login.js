@@ -37,7 +37,7 @@ async function boot() {
     mode = "setup";
     confirmInput.classList.remove("hidden");
     if (viewer.setupTokenRequired && !urlSetupToken) setupTokenInput.classList.remove("hidden");
-    submit.textContent = t("login.setPassword");
+    submit.textContent = t("login.setPassphrase");
     document.querySelector(".sub").textContent = t("login.firstVisit");
   }
 }
