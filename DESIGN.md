@@ -41,7 +41,7 @@ Not a CRDT. Characters get stable element ids (`articulated` `ElementId`s). Clie
 
 ## Auth model
 
-Single-owner, like jot: one password (PBKDF2-SHA256 via WebCrypto, 210k iterations), device tokens (high-entropy random, stored SHA-256-hashed), API keys likewise. Share links per document with access levels `none | view | comment | edit`; commenters on shared docs get cookie identities.
+Single-owner, like jot: one password (PBKDF2-SHA256 via WebCrypto, 100k iterations — the Workers edge cap), device tokens (high-entropy random, stored SHA-256-hashed), API keys likewise. Share links per document with access levels `none | view | comment | edit`; commenters on shared docs get cookie identities.
 
 Owner lifecycle around that one password:
 

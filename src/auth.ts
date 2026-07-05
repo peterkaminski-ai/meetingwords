@@ -1,14 +1,19 @@
 // ---------------------------------------------------------------------------
 // Single-owner auth, WebCrypto only (no Node dependencies).
 //
-// - Owner password: PBKDF2-SHA256, 210k iterations, random salt. Stored in the Registry DO
-//   `settings` as `password:v1:<iterations>:<saltB64>:<hashB64>`.
+// - Owner password: PBKDF2-SHA256, 100k iterations (the Workers edge rejects
+//   counts above 100000 — enforced in production, not in wrangler dev), random
+//   salt. Stored in the Registry DO `settings` as
+//   `password:v1:<iterations>:<saltB64>:<hashB64>`; verify honors the stored
+//   per-hash count, so existing hashes keep working.
 // - Device tokens and API keys: 32 random bytes, base64url. Stored as plain
 //   SHA-256 — their entropy is the defense; hashing only protects against a
 //   leaked database, and salting adds nothing for 256-bit random values.
 // ---------------------------------------------------------------------------
 
-const PBKDF2_ITERATIONS = 210_000;
+// Workers edge maximum; requests above it throw "Pbkdf2 failed: iteration
+// counts above 100000 are not supported".
+const PBKDF2_ITERATIONS = 100_000;
 
 const enc = new TextEncoder();
 
