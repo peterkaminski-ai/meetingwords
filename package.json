@@ -1,0 +1,39 @@
+{
+  "name": "meetingwords",
+  "version": "0.1.0",
+  "private": true,
+  "license": "CPAL-1.0",
+  "description": "Where people and agents meet in a document — serverless collaborative markdown on Cloudflare",
+  "type": "module",
+  "scripts": {
+    "build:client": "esbuild client/collab-client.ts --bundle --format=esm --outfile=public/collab-client.js && esbuild client/editor-cm.ts --bundle --format=esm --minify --outfile=public/editor-cm.js && npm run build:vendor",
+    "build:vendor": "mkdir -p public/vendor && cp node_modules/mermaid/dist/mermaid.min.js public/vendor/mermaid.min.js",
+    "dev": "npm run build:client && wrangler dev",
+    "deploy": "npm run build:client && wrangler deploy",
+    "test": "npm run build:client && vitest run",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p client"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.10.4",
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.0",
+    "@codemirror/view": "^6.43.4",
+    "@lezer/highlight": "^1.2.3",
+    "articulated": "^1.3.2",
+    "highlight.js": "^11.11.1",
+    "hono": "^4.12.27",
+    "marked": "^16.4.1",
+    "mermaid": "^11.16.0",
+    "sanitize-html": "^2.17.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.9.14",
+    "@cloudflare/workers-types": "^4.20260620.0",
+    "@types/sanitize-html": "^2.16.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.107.0"
+  }
+}

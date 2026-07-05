@@ -1,0 +1,52 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#171d26">
+<title>MeetingWords</title>
+<link rel="stylesheet" href="/styles.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script>(() => { const t = localStorage.getItem("mw-theme"); document.documentElement.dataset.theme = t === "light" || t === "dark" ? t : matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; })();</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+
+<div class="topbar">
+  <span class="brand" data-brand><span class="brand-glyph">▦</span> MeetingWords</span>
+  <span class="spacer"></span>
+  <select id="lang-select" class="lang-select"></select>
+  <button class="icon-btn" id="keys-button" data-i18n-title="nav.agentKeys" title="Agent keys" aria-label="Agent keys">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+  </button>
+  <button class="icon-btn" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+  <button class="icon-btn" id="logout-button" data-i18n-title="nav.signOut" title="Sign out" aria-label="Sign out">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+  </button>
+</div>
+
+<div id="instance-banner" class="instance-banner" hidden></div>
+
+<div class="wrap">
+  <div style="display:flex; gap:10px;">
+    <input type="search" id="search" data-i18n-placeholder="list.searchPlaceholder" placeholder="Search docs…" style="flex:1">
+    <button class="primary" id="new-button" data-i18n="list.newDoc">New doc</button>
+  </div>
+  <div class="doc-list" id="list"></div>
+  <footer class="attribution" id="attribution"></footer>
+</div>
+
+<dialog id="keys-dialog">
+  <h3 style="margin-top:0" data-i18n="nav.agentKeys">Agent keys</h3>
+  <p class="muted small" data-i18n="keys.explainer">API keys let agents read, edit, and comment. The label names the agent — its edits appear under that name, live.</p>
+  <div id="keys-list"></div>
+  <div style="display:flex; gap:8px; margin-top:12px;">
+    <input type="text" id="key-label" data-i18n-placeholder="keys.labelPlaceholder" placeholder="Agent name (e.g. Saga)" style="flex:1">
+    <button class="primary" id="key-create" data-i18n="keys.create">Create</button>
+  </div>
+  <div id="key-reveal" class="hidden" style="margin-top:12px;">
+    <p class="small" data-i18n="keys.revealNote">Copy this key now — it won't be shown again:</p>
+    <code id="key-value" style="user-select:all; word-break:break-all;"></code>
+  </div>
+  <div style="margin-top:16px; text-align:right;">
+    <button id="keys-close" data-i18n="keys.close">Close</button>
+  </div>
+</dialog>
+
+<script type="module" src="/app.js"></script>

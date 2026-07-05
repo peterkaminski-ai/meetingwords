@@ -1,0 +1,26 @@
+MeetingWords
+Copyright (c) 2026 Peter Kaminski. All Rights Reserved.
+
+This software is licensed under the Common Public Attribution License
+Version 1.0 (CPAL-1.0); see the LICENSE file at the root of this
+repository. Rather than carrying a license header, each source file in
+this repository is covered by the notice in LICENSE Exhibit A.
+
+Attribution (LICENSE Exhibit B): deployments display the one-line
+attribution — "© 2026 Peter Kaminski · Runs MeetingWords ·
+https://meetingwords.com" — which the software renders as the standard
+footer software line. Leaving that footer in place satisfies the
+attribution requirement.
+
+"MeetingWords" is a trademark of Peter Kaminski, in continuous public
+use for this collaborative editing service since 2010. The CPAL grants
+rights to the code, not the name: call your deployment something of
+your own unless you have permission.
+
+Commercial licenses (attribution removal, proprietary embedding):
+support@meetingwords.com.
+
+The license has lineage: CPAL was created at Socialtext and approved by
+the OSI in 2007. Using it here places MeetingWords under the license
+written at the last collaborative-document company its author helped
+build.

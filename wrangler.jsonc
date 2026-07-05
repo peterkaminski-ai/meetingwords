@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "meetingwords",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "DOC",
+        "class_name": "Doc"
+      },
+      {
+        "name": "REGISTRY",
+        "class_name": "Registry"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["Doc", "Registry"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+  // Instance identity (optional; see src/instance.ts). Branded instances set:
+  // "vars": {
+  //   "INSTANCE_NAME": "Dyad Jam #1",
+  //   "INSTANCE_BANNER_MD": "Welcome! Schedule: [the commons](https://example.com)"
+  // }
+}

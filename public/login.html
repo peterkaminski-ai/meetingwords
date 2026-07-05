@@ -1,0 +1,28 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#171d26">
+<title>MeetingWords — sign in</title>
+<link rel="stylesheet" href="/styles.css">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script>(() => { const t = localStorage.getItem("mw-theme"); document.documentElement.dataset.theme = t === "light" || t === "dark" ? t : matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; })();</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+
+<button class="icon-btn floating-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme"></button>
+<select id="lang-select" class="lang-select floating-lang"></select>
+
+<div class="auth-card">
+  <h1 data-brand>Meeting<span style="color:var(--accent)">Words</span></h1>
+  <p class="sub" data-i18n="login.tagline">Where people and agents meet in a document.</p>
+  <form id="form">
+    <input type="password" id="password" data-i18n-placeholder="login.password" placeholder="Password" autocomplete="current-password" required>
+    <input type="password" id="confirm" data-i18n-placeholder="login.confirmPassword" placeholder="Confirm password" autocomplete="new-password" class="hidden">
+    <input type="text" id="setup-token" data-i18n-placeholder="login.setupToken" placeholder="Setup token" autocomplete="off" class="hidden">
+    <div class="error" id="error"></div>
+    <button class="primary" id="submit" type="submit" data-i18n="login.signIn">Sign in</button>
+  </form>
+</div>
+
+<footer class="attribution" id="attribution"></footer>
+
+<script type="module" src="/login.js"></script>

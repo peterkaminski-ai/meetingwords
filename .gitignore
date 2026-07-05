@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+public/collab-client.js
+.dev.vars
+*.log
+.DS_Store
+public/vendor/
+public/editor-cm.js
