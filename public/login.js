@@ -15,6 +15,10 @@ const submit = document.getElementById("submit");
 
 let mode = "login";
 
+// Which building is this? Two instances look identical without it (the
+// production flagship vs. a local dev copy bit us first).
+document.getElementById("instance-host").textContent = location.host;
+
 async function boot() {
   // A localStorage token can re-establish the cookie without a password.
   const saved = localStorage.getItem(TOKEN_KEY);
@@ -39,7 +43,22 @@ async function boot() {
     if (viewer.setupTokenRequired && !urlSetupToken) setupTokenInput.classList.remove("hidden");
     submit.textContent = t("login.setPassphrase");
     document.querySelector(".sub").textContent = t("login.firstVisit");
+    return;
   }
+
+  // A locked-out owner needs a direction, not a dead end: front-desk
+  // recovery where a front desk exists, honest no-reset guidance where not.
+  const lostLine = document.getElementById("lost-line");
+  const frontdesk = viewer.instance?.frontdeskUrl;
+  if (frontdesk !== null && frontdesk !== undefined) {
+    const link = document.createElement("a");
+    link.href = `${frontdesk}/help#support`;
+    link.textContent = t("login.lostFronted");
+    lostLine.replaceChildren(link);
+  } else {
+    lostLine.textContent = t("login.lostSelf");
+  }
+  lostLine.classList.remove("hidden");
 }
 
 form.addEventListener("submit", async (event) => {
