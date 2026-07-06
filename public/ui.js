@@ -1,6 +1,6 @@
 // Shared client helpers (plain ES module — no build step needed).
 
-import { t } from "/i18n.js";
+import { lang, t } from "/i18n.js";
 
 // --- theme --------------------------------------------------------------------
 
@@ -450,7 +450,7 @@ export function renderThreads(container, threads, handlers) {
  * when the page already has one; otherwise this fetches it.
  */
 export async function applyInstance(viewer) {
-  const v = viewer || (await api("/api/viewer"));
+  const v = viewer || (await api(`/api/viewer?lang=${encodeURIComponent(lang)}`));
   const instance = v?.instance;
   if (!instance) return null;
 

@@ -5,7 +5,7 @@ export type Env = {
 
   // Instance identity (all optional; see src/instance.ts).
   INSTANCE_NAME?: string; // what this deployment is called; default "MeetingWords"
-  INSTANCE_BANNER_MD?: string; // optional operator notice, markdown, shown on pages
+  INSTANCE_BANNER_MD?: string; // optional operator notice: markdown, or a JSON object of language-keyed markdown ({"en": ..., "es": ...}); resolution = viewer lang -> en -> first value
   FRONTDESK_URL?: string; // when set, share pages offer "save to your documents", posting to `${FRONTDESK_URL}/desk/save`; "/" means same origin (the fronted-flagship case). Unset, no save affordance exists — the self-hosted default.
 
   // Owner-credential lifecycle (all optional; see DESIGN.md "Auth model").

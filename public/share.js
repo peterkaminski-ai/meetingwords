@@ -1,5 +1,5 @@
 import { bindEditor } from "/editor-cm.js";
-import { initI18n, t } from "/i18n.js";
+import { initI18n, lang, t } from "/i18n.js";
 import { api, applyInstance, debounce, downloadFile, el, initScrollSync, initTheme, initViewMode, lineOfIndex, makeRoster, markdownFilename, renderMermaidIn, renderThreads, setPressed, wsUrl } from "/ui.js";
 
 initI18n();
@@ -35,7 +35,7 @@ async function boot() {
   threads = state.threads || [];
   setTitle(state.doc.title);
 
-  const viewer = await api("/api/viewer");
+  const viewer = await api(`/api/viewer?lang=${encodeURIComponent(lang)}`);
   const instance = await applyInstance(viewer);
   if (instance?.branded) {
     brandName = instance.name;

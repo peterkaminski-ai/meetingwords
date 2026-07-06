@@ -12,7 +12,7 @@ import {
   setupTokenExpiry,
   setupTokenFresh,
 } from "./auth-throttle";
-import { instanceInfo } from "./instance";
+import { instanceInfo, normalizeLang } from "./instance";
 import { registryStub } from "./registry";
 import { renderMarkdown } from "./render";
 import { H_ACCESS, H_AGENT, H_GUEST_ID, H_GUEST_NAME, H_ROLE, type Env } from "./env";
@@ -243,7 +243,7 @@ app.get("/api/viewer", async (c) => {
     authConfigured: configured,
     ownerAuthenticated: await isOwner(c),
     guestName: getCookie(c, GUEST_NAME_COOKIE) || null,
-    instance: instanceInfo(c.env),
+    instance: instanceInfo(c.env, normalizeLang(c.req.query("lang"))),
     setupTokenRequired: configured ? false : await setupTokenRequired(c.env),
   });
 });

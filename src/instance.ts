@@ -25,14 +25,45 @@ export type InstanceInfo = {
   frontdeskUrl: string | null;
 };
 
-export function instanceInfo(env: Env): InstanceInfo {
+/**
+ * INSTANCE_BANNER_MD is either a single markdown string or a JSON object of
+ * language-keyed markdown ({"en": "...", "es": "..."}). The core stays
+ * mechanism-only: the operator supplies every translation; we just pick one.
+ * Resolution: requested language → "en" → the first value provided.
+ */
+export function bannerMarkdown(raw: string | undefined, lang: string): string | null {
+  const value = (raw || "").trim();
+  if (!value) return null;
+  if (value.startsWith("{")) {
+    try {
+      const map = JSON.parse(value) as unknown;
+      if (map && typeof map === "object" && !Array.isArray(map)) {
+        const entries = map as Record<string, unknown>;
+        const pick = entries[lang] ?? entries.en ?? Object.values(entries)[0];
+        return typeof pick === "string" && pick.trim() ? pick : null;
+      }
+    } catch {
+      // not JSON — a banner that happens to start with "{" is still a banner
+    }
+  }
+  return value;
+}
+
+/** "es-MX" → "es"; anything unrecognizable → "en". */
+export function normalizeLang(raw: string | undefined): string {
+  const base = String(raw || "").toLowerCase().split("-")[0].replace(/[^a-z]/g, "");
+  return base || "en";
+}
+
+export function instanceInfo(env: Env, lang = "en"): InstanceInfo {
   const name = (env.INSTANCE_NAME || "").trim() || SOFTWARE_NAME;
   const frontdesk = (env.FRONTDESK_URL || "").trim();
+  const bannerMd = bannerMarkdown(env.INSTANCE_BANNER_MD, lang);
   return {
     name,
     branded: name !== SOFTWARE_NAME,
     software: { name: SOFTWARE_NAME, version: SOFTWARE_VERSION, url: SOFTWARE_URL },
-    bannerHtml: env.INSTANCE_BANNER_MD ? renderMarkdown(env.INSTANCE_BANNER_MD) : null,
+    bannerHtml: bannerMd ? renderMarkdown(bannerMd) : null,
     frontdeskUrl: frontdesk ? frontdesk.replace(/\/+$/, "") : null,
   };
 }
