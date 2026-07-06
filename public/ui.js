@@ -469,8 +469,28 @@ export async function applyInstance(viewer) {
 
   const banner = document.getElementById("instance-banner");
   if (banner && instance.bannerHtml) {
-    banner.innerHTML = instance.bannerHtml;
-    banner.hidden = false;
+    // Dismissal is per banner *content* — a changed banner reappears.
+    const dismissKey = `mw-banner-dismissed:${hashString(instance.bannerHtml)}`;
+    if (!localStorage.getItem(dismissKey)) {
+      banner.innerHTML = instance.bannerHtml;
+      const dismiss = el(
+        "button",
+        { type: "button", class: "icon-btn banner-dismiss", title: t("banner.dismiss"), "aria-label": t("banner.dismiss") },
+        "✕",
+      );
+      dismiss.addEventListener("click", () => {
+        localStorage.setItem(dismissKey, "1");
+        banner.hidden = true;
+      });
+      banner.append(dismiss);
+      banner.hidden = false;
+    }
   }
   return instance;
+}
+
+function hashString(value) {
+  let hash = 5381;
+  for (let i = 0; i < value.length; i++) hash = ((hash << 5) + hash + value.charCodeAt(i)) >>> 0;
+  return hash.toString(36);
 }

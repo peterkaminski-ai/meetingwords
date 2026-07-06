@@ -452,18 +452,18 @@ const S = {
 
   // -- save ribbon (share pages, front-desk-fronted instances only) --
   "save.prompt": {
-    en: "Never lose this link — save it to your documents.",
-    es: "No pierdas este enlace: guárdalo en tus documentos.",
-    zh: "别弄丢这个链接——把它保存到你的文档。",
-    hi: "यह लिंक खोएँ नहीं — इसे अपने दस्तावेज़ों में सहेजें।",
-    ar: "لا تفقد هذا الرابط — احفظه في مستنداتك.",
-    pt: "Não perca este link — salve-o nos seus documentos.",
-    fr: "Ne perdez pas ce lien — enregistrez-le dans vos documents.",
-    ru: "Не потеряйте эту ссылку — сохраните её в свои документы.",
-    ja: "このリンクをなくさないで——自分のドキュメントに保存しましょう。",
-    de: "Verlier diesen Link nicht — speichere ihn in deinen Dokumenten.",
-    ko: "이 링크를 잃어버리지 마세요. 내 문서에 저장하세요.",
-    it: "Non perdere questo link: salvalo nei tuoi documenti.",
+    en: "Don't lose this link — bookmark it, or save it here:",
+    es: "No pierdas este enlace: márcalo como favorito o guárdalo aquí:",
+    zh: "别弄丢这个链接——收藏它，或在这里保存：",
+    hi: "यह लिंक खोएँ नहीं — इसे बुकमार्क करें, या यहाँ सहेजें:",
+    ar: "لا تفقد هذا الرابط — أضفه إلى المفضلة أو احفظه هنا:",
+    pt: "Não perca este link — adicione aos favoritos ou salve aqui:",
+    fr: "Ne perdez pas ce lien — ajoutez-le à vos favoris, ou enregistrez-le ici :",
+    ru: "Не потеряйте эту ссылку — добавьте в закладки или сохраните здесь:",
+    ja: "このリンクをなくさないで——ブックマークするか、ここに保存：",
+    de: "Verlier diesen Link nicht — setz ein Lesezeichen oder speichere ihn hier:",
+    ko: "이 링크를 잃어버리지 마세요 — 북마크하거나 여기에 저장하세요:",
+    it: "Non perdere questo link: aggiungilo ai segnalibri o salvalo qui:",
   },
   "save.emailPlaceholder": {
     en: "you@example.com", es: "tu@example.com", zh: "you@example.com", hi: "you@example.com",
@@ -507,6 +507,20 @@ const S = {
   "save.dismiss": {
     en: "Dismiss", es: "Descartar", zh: "关闭", hi: "हटाएँ", ar: "إغلاق",
     pt: "Dispensar", fr: "Ignorer", ru: "Скрыть", ja: "閉じる", de: "Ausblenden", ko: "닫기", it: "Ignora",
+  },
+  "banner.dismiss": {
+    en: "Dismiss", es: "Descartar", zh: "关闭", hi: "हटाएँ", ar: "إغلاق",
+    pt: "Dispensar", fr: "Ignorer", ru: "Скрыть", ja: "閉じる", de: "Ausblenden", ko: "닫기", it: "Ignora",
+  },
+  "shareView.renameHint": {
+    en: "Click to rename", es: "Haz clic para renombrar", zh: "点击重命名",
+    hi: "नाम बदलने के लिए क्लिक करें", ar: "انقر لإعادة التسمية", pt: "Clique para renomear",
+    fr: "Cliquez pour renommer", ru: "Нажмите, чтобы переименовать", ja: "クリックして名前を変更",
+    de: "Zum Umbenennen klicken", ko: "클릭하여 이름 변경", it: "Fai clic per rinominare",
+  },
+  "nav.home": {
+    en: "Home", es: "Inicio", zh: "首页", hi: "होम", ar: "الصفحة الرئيسية",
+    pt: "Início", fr: "Accueil", ru: "Главная", ja: "ホーム", de: "Startseite", ko: "홈", it: "Home",
   },
 
   // -- relative time --

@@ -47,6 +47,7 @@ async function boot() {
 
   if (access === "edit") {
     if (!guestName) await askName();
+    initTitleEdit();
     startEditor();
   } else {
     startReader();
@@ -60,10 +61,18 @@ async function boot() {
 // The save ribbon exists only where a front desk does (frontdeskUrl: "" =
 // same origin, a string = its base URL, null = none). The POST goes to the
 // front desk, not this instance — the core never sees the email.
-function initSaveRibbon(instance) {
+async function initSaveRibbon(instance) {
   const base = instance?.frontdeskUrl;
   if (base === null || base === undefined) return;
   if (sessionStorage.getItem(`mw-save-dismissed:${shareId}`)) return;
+  // Already on this visitor's saved list? Then the ribbon has nothing to ask.
+  // Front desk unreachable (or cross-origin without credentials) → show it.
+  try {
+    const saved = await fetch(`${base}/desk/saved?shareId=${encodeURIComponent(shareId)}`, { credentials: "same-origin" });
+    if (saved.ok && (await saved.json()).saved) return;
+  } catch {
+    // fall through
+  }
   const ribbon = document.getElementById("save-ribbon");
   const form = document.getElementById("save-form");
   ribbon.hidden = false;
@@ -94,6 +103,43 @@ function setTitle(title) {
   currentTitle = title;
   document.getElementById("doc-title").textContent = title;
   document.title = `${title} — ${brandName}`;
+}
+
+// Editors can rename in place: click the title, type, Enter (Escape cancels).
+// The rename rides the edit endpoint with an empty edits batch; the server
+// broadcasts the new title to every connected client.
+function initTitleEdit() {
+  const titleEl = document.getElementById("doc-title");
+  titleEl.classList.add("editable-title");
+  titleEl.title = t("shareView.renameHint");
+  titleEl.addEventListener("click", () => {
+    if (titleEl.querySelector("input")) return;
+    const input = el("input", { type: "text", class: "title-input", value: currentTitle });
+    titleEl.replaceChildren(input);
+    input.focus();
+    input.select();
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        input.blur();
+      } else if (event.key === "Escape") {
+        input.value = currentTitle;
+        input.blur();
+      }
+    });
+    input.addEventListener(
+      "blur",
+      async () => {
+        const next = input.value.trim();
+        setTitle(currentTitle);
+        if (next && next !== currentTitle) {
+          const result = await api(`/api/share/${shareId}/edit`, { method: "POST", body: { edits: [], title: next } });
+          if (result.ok) setTitle(next);
+        }
+      },
+      { once: true },
+    );
+  });
 }
 
 function updateNameUi() {

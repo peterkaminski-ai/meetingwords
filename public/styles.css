@@ -86,7 +86,9 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   z-index: 5;
 }
 .topbar .brand { font-weight: 650; letter-spacing: 0.2px; white-space: nowrap; }
-.topbar .brand .brand-glyph { color: var(--accent); }
+.topbar .brand .brand-glyph { color: var(--accent); text-decoration: none; }
+.topbar .brand .editable-title { cursor: pointer; }
+.topbar .brand .title-input { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; min-width: 12rem; }
 .topbar .spacer { flex: 1; }
 .topbar #title { width: 280px; min-width: 0; }
 
@@ -526,12 +528,18 @@ dialog::backdrop { background: var(--backdrop); }
 .attribution a { color: inherit; text-decoration: underline; }
 
 .instance-banner {
-  padding: 8px 16px;
+  position: relative;
+  padding: 8px 40px 8px 16px;
   font-size: 13px;
   background: color-mix(in srgb, var(--accent, #4f8cff) 12%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--accent, #4f8cff) 25%, transparent);
 }
 .instance-banner p { margin: 4px 0; }
+.instance-banner .banner-dismiss { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); }
+
+/* The hidden attribute must always win — .save-ribbon's display:flex was
+   silently overriding it, which made the ribbon undismissable (Pete, 2026-07-05). */
+[hidden] { display: none !important; }
 
 .save-ribbon {
   display: flex;
