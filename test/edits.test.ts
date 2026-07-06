@@ -122,3 +122,66 @@ describe("agent text edits", () => {
     expect(state.text).toBe("alpha beta gamma");
   });
 });
+
+describe("seeding and appending (the empty-document fixes, 2026-07-05)", () => {
+  it("seeds an empty document with an empty oldText", () => {
+    const state = collabFromText("");
+    const result = resolveTextEdits(state, [{ oldText: "", newText: "# Hello\n" }], null);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.state.text).toBe("# Hello\n");
+  });
+
+  it("rejects an empty oldText when the document has content", () => {
+    const state = collabFromText("already here");
+    const result = resolveTextEdits(state, [{ oldText: "", newText: "clobber" }], null);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors?.[0]).toMatch(/only when the document is empty/);
+  });
+
+  it("rejects seeding with an empty newText", () => {
+    const state = collabFromText("");
+    const result = resolveTextEdits(state, [{ oldText: "", newText: "" }], null);
+    expect(result.ok).toBe(false);
+  });
+
+  it("appends to a non-empty document", () => {
+    const state = collabFromText("line one\n");
+    const result = resolveTextEdits(state, [{ append: "line two\n" }], null);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.state.text).toBe("line one\nline two\n");
+  });
+
+  it("appends to an empty document", () => {
+    const state = collabFromText("");
+    const result = resolveTextEdits(state, [{ append: "first\n" }], null);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.state.text).toBe("first\n");
+  });
+
+  it("rejects append combined with oldText", () => {
+    const state = collabFromText("abc");
+    const result = resolveTextEdits(state, [{ append: "x", oldText: "abc", newText: "y" }], null);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors?.[0]).toMatch(/cannot be combined/);
+  });
+
+  it("rejects an empty append", () => {
+    const state = collabFromText("abc");
+    const result = resolveTextEdits(state, [{ append: "" }], null);
+    expect(result.ok).toBe(false);
+  });
+
+  it("mixes append with replacements in one atomic batch", () => {
+    const state = collabFromText("alpha beta");
+    const result = resolveTextEdits(
+      state,
+      [
+        { oldText: "alpha", newText: "A" },
+        { append: " gamma" },
+      ],
+      null,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.state.text).toBe("A beta gamma");
+  });
+});

@@ -622,8 +622,8 @@ export class Doc extends DurableObject<Env> {
       baseCounter?: number;
       title?: string;
     };
-    if (!Array.isArray(body.edits) || body.edits.length === 0) {
-      return json({ ok: false, error: "edits must be a non-empty array of {oldText, newText}." }, 400);
+    if (!Array.isArray(body.edits) || (body.edits.length === 0 && body.title === undefined)) {
+      return json({ ok: false, error: "edits must be an array of {oldText, newText} / {append} edits — empty only when renaming with title." }, 400);
     }
 
     const agentLabel = request.headers.get(H_AGENT);

@@ -40,6 +40,11 @@ POST /api/docs/:id/edit
 
 - Each oldText must match the document exactly once; the batch is atomic
   (all edits apply or none).
+- Empty document? \`{"oldText": "", "newText": "..."}\` seeds it — allowed
+  only while the document is empty, so a bad match can never silently
+  prepend to real content.
+- Appending? \`{"append": "..."}\` adds to the end regardless of content —
+  no oldText needed. Good for running notes and logs.
 - Pass \`baseCounter\` from a read's serverCounter: if the document moved on,
   unanchored edits fail 409 \`stale-base\` instead of hitting drifted text.
   Re-read, re-derive, retry.
@@ -50,6 +55,8 @@ POST /api/docs/:id/edit
   \`anchor-deleted\`, or \`anchor-collapsed\`.
 - Failures are structured: \`{ok: false, errors?: [...], conflicts?: [{index,
   reason, oldText, current}], serverCounter}\` — act on them programmatically.
+- Renaming: pass \`"title"\` alongside the edits; \`{"edits": [], "title": "..."}\`
+  renames without touching content.
 
 ## Staying current without a socket
 

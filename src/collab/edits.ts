@@ -3,8 +3,10 @@ import { applyMutations, idAtIndex, newBunchId, type CollabState } from "./core"
 import type { AppliedOp, ClientMutation } from "./types";
 
 // ---------------------------------------------------------------------------
-// Agent edit resolution: turn a batch of {oldText, newText} edits into
-// semantic mutations against live collaborative state.
+// Agent edit resolution: turn a batch of edits into semantic mutations
+// against live collaborative state. Three shapes: {oldText, newText}
+// replaces a unique or anchored span; {oldText: "", newText} seeds an empty
+// document; {append} adds to the end regardless of content.
 //
 // Agents are collaborators without cursors. When an agent read the document,
 // it may have captured id anchors for the spans it cares about; an anchored
@@ -18,9 +20,11 @@ import type { AppliedOp, ClientMutation } from "./types";
 // ---------------------------------------------------------------------------
 
 export type TextEdit = {
-  oldText: string;
-  newText: string;
+  oldText?: string;
+  newText?: string;
   anchor?: { startId: ElementId; endId: ElementId };
+  /** Append to the end of the document — the only shape that never needs an anchor. */
+  append?: string;
 };
 
 export type EditConflict = {
@@ -52,8 +56,54 @@ export function resolveTextEdits(
     const oldText = String(edit?.oldText ?? "");
     const newText = String(edit?.newText ?? "");
 
+    // Shape 3: {append} — add to the end, whatever the document holds.
+    if (edit?.append !== undefined) {
+      if (edit.oldText !== undefined || edit.newText !== undefined || edit.anchor) {
+        errors.push(`edit ${i}: append cannot be combined with oldText/newText/anchor`);
+        continue;
+      }
+      const appendText = String(edit.append);
+      if (!appendText) {
+        errors.push(`edit ${i}: append must be non-empty`);
+        continue;
+      }
+      const len = working.text.length;
+      const result = applyMutations(working, [
+        {
+          name: "insert",
+          clientCounter: ++clientCounter,
+          args: {
+            before: len > 0 ? idAtIndex(working, len - 1) : null,
+            id: { bunchId: newBunchId(), counter: 0 },
+            content: appendText,
+          },
+        },
+      ]);
+      working = result.state;
+      applied.push(...result.applied);
+      continue;
+    }
+
+    // Shape 2: empty oldText seeds an empty document — and only an empty one,
+    // so a mistyped anchor can never silently prepend to real content.
     if (!oldText) {
-      errors.push(`edit ${i}: oldText must be non-empty`);
+      if (working.text.length > 0) {
+        errors.push(`edit ${i}: oldText may be empty only when the document is empty — use {append} or anchor on existing text`);
+        continue;
+      }
+      if (!newText) {
+        errors.push(`edit ${i}: newText must be non-empty when seeding an empty document`);
+        continue;
+      }
+      const result = applyMutations(working, [
+        {
+          name: "insert",
+          clientCounter: ++clientCounter,
+          args: { before: null, id: { bunchId: newBunchId(), counter: 0 }, content: newText },
+        },
+      ]);
+      working = result.state;
+      applied.push(...result.applied);
       continue;
     }
 
