@@ -7,10 +7,10 @@ repository. Rather than carrying a license header, each source file in
 this repository is covered by the notice in LICENSE Exhibit A.
 
 Attribution (LICENSE Exhibit B): deployments display the one-line
-attribution — "© 2026 Peter Kaminski · Runs MeetingWords ·
-https://meetingwords.com" — which the software renders as the standard
-footer software line. Leaving that footer in place satisfies the
-attribution requirement.
+attribution — "This site runs MeetingWords v<version>", with
+"MeetingWords" linking to https://meetingwords.com — which the software
+renders as the standard footer software line. Leaving that footer in
+place satisfies the attribution requirement.
 
 "MeetingWords" is a trademark of Peter Kaminski, in continuous public
 use for this collaborative editing service since 2010. The CPAL grants

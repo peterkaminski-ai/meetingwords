@@ -464,7 +464,7 @@ export async function applyInstance(viewer) {
   const attribution = document.getElementById("attribution");
   if (attribution) {
     const link = el("a", { href: instance.software.url }, instance.software.name);
-    attribution.replaceChildren("runs ", link, ` ${instance.software.version}`);
+    attribution.replaceChildren("This site runs ", link, ` v${instance.software.version}`);
   }
 
   const banner = document.getElementById("instance-banner");

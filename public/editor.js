@@ -1,9 +1,10 @@
 import { bindEditor } from "/editor-cm.js";
 import { initI18n, t } from "/i18n.js";
-import { api, debounce, downloadFile, el, initScrollSync, initTheme, initViewMode, lineOfIndex, makeRoster, markdownFilename, renderMermaidIn, renderThreads, setPressed, wsUrl } from "/ui.js";
+import { api, applyInstance, debounce, downloadFile, el, initScrollSync, initTheme, initViewMode, lineOfIndex, makeRoster, markdownFilename, renderMermaidIn, renderThreads, setPressed, wsUrl } from "/ui.js";
 
 initI18n();
 initTheme();
+applyInstance();
 
 const LINENOS_KEY = "mw-linenos";
 const linenosOn = localStorage.getItem(LINENOS_KEY) === "1";
