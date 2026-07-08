@@ -45,6 +45,12 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedStyles: {},
 };
 
+// YAML frontmatter: a `---` fence on the very first line, closed by a later
+// `---` line (the gray-matter/Jekyll rule). Rendered as a highlighted yaml
+// code block — treating it as markdown turns `--- ` into headings/rules and
+// lets the sanitizer eat placeholder text like <host>.
+const FRONTMATTER_RE = /^---[ \t]*\n([\s\S]*?)\n---[ \t]*(?:\n|$)/;
+
 /**
  * Render markdown to sanitized HTML. Each top-level block is wrapped in
  * <div class="line-anchor" data-line="N"> carrying its 1-based source line —
@@ -52,9 +58,16 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
  * sync. Invisible unless the client styles them.
  */
 export function renderMarkdown(markdown: string): string {
-  const tokens = marked.lexer(markdown);
   let line = 1;
   let html = "";
+  const fm = FRONTMATTER_RE.exec(markdown);
+  if (fm) {
+    const body = hljs.highlight(fm[1], { language: "yaml" }).value;
+    html += `<div class="line-anchor" data-line="1"><pre><code class="hljs language-yaml frontmatter">${body}</code></pre></div>`;
+    line += (fm[0].match(/\n/g) || []).length;
+    markdown = markdown.slice(fm[0].length);
+  }
+  const tokens = marked.lexer(markdown);
   for (const token of tokens) {
     const raw: string = token.raw ?? "";
     // Reference-link definitions live on the lexer result; parser needs them.
