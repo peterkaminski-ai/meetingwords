@@ -67,9 +67,14 @@ async function initSaveRibbon(instance) {
   if (sessionStorage.getItem(`mw-save-dismissed:${shareId}`)) return;
   // Already on this visitor's saved list? Then the ribbon has nothing to ask.
   // Front desk unreachable (or cross-origin without credentials) → show it.
+  let signedIn = false;
   try {
     const saved = await fetch(`${base}/desk/saved?shareId=${encodeURIComponent(shareId)}`, { credentials: "same-origin" });
-    if (saved.ok && (await saved.json()).saved) return;
+    if (saved.ok) {
+      const state = await saved.json();
+      if (state.saved) return;
+      signedIn = Boolean(state.signedIn);
+    }
   } catch {
     // fall through
   }
@@ -80,6 +85,37 @@ async function initSaveRibbon(instance) {
     sessionStorage.setItem(`mw-save-dismissed:${shareId}`, "1");
     ribbon.hidden = true;
   });
+  // A session already proves the address: one click, no email round-trip.
+  if (signedIn) {
+    form.classList.add("hidden");
+    const saveNow = document.getElementById("save-now");
+    saveNow.classList.remove("hidden");
+    document.getElementById("save-now-btn").addEventListener("click", async () => {
+      try {
+        const response = await fetch(`${base}/desk/save`, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ shareId }),
+        });
+        if (!response.ok) throw new Error(String(response.status));
+        const result = await response.json();
+        saveNow.classList.add("hidden");
+        if (result.saved) {
+          document.getElementById("save-done").classList.remove("hidden");
+        } else if (result.cap) {
+          const cap = document.getElementById("save-cap");
+          const account = el("a", { href: `${base}/account#plan` }, t("save.capLink"));
+          cap.replaceChildren(`${t("save.capFull")} `, account);
+          cap.classList.remove("hidden");
+        } else {
+          throw new Error("unexpected response");
+        }
+      } catch {
+        alert(t("save.error"));
+      }
+    });
+  }
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const email = document.getElementById("save-email").value.trim();

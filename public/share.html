@@ -51,7 +51,13 @@
     <input type="email" id="save-email" data-i18n-placeholder="save.emailPlaceholder" placeholder="you@example.com" autocomplete="email" required>
     <button class="primary" type="submit" data-i18n="save.button">Save to your documents</button>
   </form>
+  <div class="save-now hidden" id="save-now">
+    <span class="save-prompt" data-i18n="save.promptSignedIn">You're signed in — keep this document on your list:</span>
+    <button class="primary" type="button" id="save-now-btn" data-i18n="save.button">Save to your documents</button>
+  </div>
   <span class="save-sent hidden" id="save-sent" data-i18n="save.sent">Check your email — click the link there to finish saving.</span>
+  <span class="save-sent hidden" id="save-done" data-i18n="save.saved">Saved ✓</span>
+  <span class="save-sent hidden" id="save-cap"></span>
   <button type="button" class="icon-btn save-dismiss" id="save-dismiss" data-i18n-title="save.dismiss" title="Dismiss" aria-label="Dismiss">✕</button>
 </div>
 
