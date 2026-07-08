@@ -221,9 +221,24 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 
 /* --- editor layout --- */
 .editor-shell { display: flex; height: calc(100vh - 53px - 28px); height: calc(100dvh - 53px - 28px); }
-/* The editor chrome fills the viewport exactly; its attribution is a slim
-   strip inside the fold (28px, matching the shell calc), not a scroll-tail. */
-.editor-shell + .attribution { margin: 0; padding: 0; height: 28px; line-height: 28px; box-sizing: border-box; }
+/* An active editor shell makes the page an app surface: a flex column that
+   fits the viewport exactly — topbar, panes, attribution — whatever height
+   the topbar actually is (it wraps on narrow screens; 53px was a lie at some
+   font sizes). Panes scroll inside themselves; the page never scrolls. The
+   fixed-height calc above stays as the fallback for browsers without :has().
+   Covers both editor.html and share.html's guest editor. */
+body:has(> .editor-shell:not(.hidden)) {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+body:has(> .editor-shell:not(.hidden)) > .editor-shell { flex: 1; min-height: 0; height: auto; }
+body:has(> .editor-shell:not(.hidden)) > .attribution { flex: none; }
+/* The in-viewport attribution is a slim strip, not a page-flow scroll-tail. */
+.editor-shell + .attribution,
+body:has(> .editor-shell:not(.hidden)) > .attribution { margin: 0; padding: 0; height: 28px; line-height: 28px; box-sizing: border-box; }
 .editor-main { flex: 1; display: flex; min-width: 0; --split: 50%; }
 .editor-main.split .editor-cm { flex: 0 0 var(--split); }
 /* Read mode: rendered pane only, content centered at reading measure */
