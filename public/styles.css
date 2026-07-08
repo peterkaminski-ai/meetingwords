@@ -220,7 +220,10 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .badge.shared { color: var(--ok); border-color: var(--ok); }
 
 /* --- editor layout --- */
-.editor-shell { display: flex; height: calc(100vh - 53px); height: calc(100dvh - 53px); }
+.editor-shell { display: flex; height: calc(100vh - 53px - 28px); height: calc(100dvh - 53px - 28px); }
+/* The editor chrome fills the viewport exactly; its attribution is a slim
+   strip inside the fold (28px, matching the shell calc), not a scroll-tail. */
+.editor-shell + .attribution { margin: 0; padding: 0; height: 28px; line-height: 28px; box-sizing: border-box; }
 .editor-main { flex: 1; display: flex; min-width: 0; --split: 50%; }
 .editor-main.split .editor-cm { flex: 0 0 var(--split); }
 /* Read mode: rendered pane only, content centered at reading measure */
