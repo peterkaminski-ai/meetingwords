@@ -97,7 +97,7 @@ MeetingWords is open source under the [Common Public Attribution License 1.0](LI
 
 What CPAL means in practice (plain-language version at [meetingwords.org/license](https://meetingwords.org/license)):
 
-- **Run it, modify it, self-host it — free.** Keep the one-line "Runs MeetingWords" attribution in the footer (the software renders it for you; leaving it alone is compliance).
+- **Run it, modify it, self-host it — free.** Keep the one-line "This site runs MeetingWords" attribution in the footer (the software renders it for you, version and link included; leaving it alone is compliance).
 - **Run a modified copy as a service** and you make your modifications' source available (§15 — network use counts as distribution).
 - **The name is not the code.** "MeetingWords" is a trademark; deployments that aren't ours pick their own name.
 - **Attribution removal or proprietary embedding**: commercial licenses available — support@meetingwords.com.
