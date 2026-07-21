@@ -1,4 +1,10 @@
 <meta charset="utf-8">
+<!-- Agents: don't drive this editor through the DOM. You'd race live collaborators
+     with no conflict detection, and a stray .fill() clears the whole document.
+     There is an HTTP API:
+       read    GET  /s/<share-id>?format=md    (or send Accept: text/markdown)
+       append  POST /api/share/<share-id>/edit  {"edits":[{"append":"..."}]}
+     Full guide: /llms.txt -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#171d26">
 <title>MeetingWords — shared doc</title>

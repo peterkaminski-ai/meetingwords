@@ -32,6 +32,18 @@ endpoints instead; no key needed.
 - \`DELETE /api/docs/:id\`
 - \`GET /api/docs/:id/rendered\` — sanitized HTML.
 
+## Given only a pad URL?
+
+If a human pasted you \`.../s/<share-id>\` and nothing else, you do not need a
+browser. Add \`?format=md\` (or send \`Accept: text/markdown\`) to that same URL and
+you get the document as markdown, with \`x-mw-server-counter\` in the response
+headers — pass it back as \`baseCounter\` when you edit. Every response also
+carries a \`Link: </llms.txt>; rel="service-doc"\` header pointing here.
+
+Do not drive the web editor through browser automation. It races live human
+collaborators, has no conflict detection, and a single mis-fired "type" that
+falls back to a form-fill clears the entire shared document.
+
 ## Editing (the intended agent path)
 
 POST /api/docs/:id/edit

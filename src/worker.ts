@@ -43,6 +43,26 @@ type Ctx = Context<AppEnv>;
 
 const app = new Hono<AppEnv>();
 
+// Every response advertises the agent API, so an agent that has only fetched a
+// URL — even with HEAD — already knows there's a programmatic path and where the
+// manual is. Without this, discovering the API is a matter of whether the agent
+// happens to go looking: browser automation against the editor DOM "works" well
+// enough that nothing ever prompts the search, and an agent driving the live
+// editor races human collaborators with no conflict detection. Relative URLs so
+// self-hosted instances point at their own guide.
+const AGENT_LINK = '</llms.txt>; rel="service-doc"; type="text/markdown", </api>; rel="service-desc"';
+
+app.use("*", async (c, next) => {
+  await next();
+  // 101 responses are WebSocket upgrades — they can't be rebuilt, and an agent
+  // reaching one has already found the API anyway.
+  if (c.res.status === 101 || c.res.headers.has("link")) return;
+  // Asset responses arrive with immutable headers; rebuild to stamp them.
+  const stamped = new Response(c.res.body, c.res);
+  stamped.headers.set("link", AGENT_LINK);
+  c.res = stamped;
+});
+
 // -- helpers ------------------------------------------------------------------
 
 function docStub(c: Ctx, docId: string) {
@@ -230,8 +250,30 @@ app.get("/d/:id", async (c) => {
   return asset(c, "/editor.html");
 });
 
+// An agent that only wants to *read* the pad should never have to open a browser
+// to do it. `?format=md`, or an Accept header that asks for markdown without also
+// asking for HTML, returns the document itself instead of the SPA shell — and the
+// response carries the counter to pass back as `baseCounter` when editing.
+function wantsMarkdown(c: Ctx): boolean {
+  const fmt = (c.req.query("format") || "").toLowerCase();
+  if (fmt) return fmt === "md" || fmt === "markdown";
+  const accept = (c.req.header("accept") || "").toLowerCase();
+  if (!accept.includes("text/markdown")) return false;
+  return !accept.includes("text/html");
+}
+
 app.get("/s/:shareId", async (c) => {
-  return asset(c, "/share.html");
+  if (!wantsMarkdown(c)) return asset(c, "/share.html");
+  const share = await resolveShare(c, c.req.param("shareId"), "view");
+  if (share instanceof Response) return share;
+  const state = await forwardToDoc(c, share.id, "/state", { role: "guest", access: share.share_access });
+  if (!state.ok) return state;
+  const data = (await state.json()) as { doc: { title: string; markdown: string; serverCounter: number } };
+  return c.body(data.doc.markdown, 200, {
+    "content-type": "text/markdown; charset=utf-8",
+    "x-mw-doc-title": encodeURIComponent(data.doc.title ?? ""),
+    "x-mw-server-counter": String(data.doc.serverCounter ?? 0),
+  });
 });
 
 // -- auth ----------------------------------------------------------------------
