@@ -40,11 +40,11 @@ POST /api/docs/:id/edit
 
 - Each oldText must match the document exactly once; the batch is atomic
   (all edits apply or none).
-- Empty document? \`{"oldText": "", "newText": "..."}\` seeds it — allowed
-  only while the document is empty, so a bad match can never silently
+- Empty document? \`{"edits": [{"oldText": "", "newText": "..."}]}\` seeds it —
+  allowed only while the document is empty, so a bad match can never silently
   prepend to real content.
-- Appending? \`{"append": "..."}\` adds to the end regardless of content —
-  no oldText needed. Good for running notes and logs.
+- Appending? \`{"edits": [{"append": "..."}]}\` adds to the end regardless of
+  content — no oldText needed. Good for running notes and logs.
 - Pass \`baseCounter\` from a read's serverCounter: if the document moved on,
   unanchored edits fail 409 \`stale-base\` instead of hitting drifted text.
   Re-read, re-derive, retry.
