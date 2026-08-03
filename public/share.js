@@ -133,7 +133,9 @@ async function initSaveRibbon(instance) {
       script.onerror = resolve;
       document.head.append(script);
     });
-    if (window.turnstile) turnstileWidget = window.turnstile.render(slot, { sitekey: turnstileSiteKey });
+    // interaction-only: the check runs silently and the widget stays hidden
+    // unless Cloudflare actually needs a human interaction.
+    if (window.turnstile) turnstileWidget = window.turnstile.render(slot, { sitekey: turnstileSiteKey, appearance: "interaction-only" });
   }
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -141,7 +143,14 @@ async function initSaveRibbon(instance) {
     if (!email) return;
     try {
       const body = { email, shareId };
-      if (turnstileWidget !== null) body.turnstileToken = window.turnstile.getResponse(turnstileWidget) || "";
+      if (turnstileWidget !== null) {
+        // The invisible check may still be running — give it a moment rather
+        // than failing a human who typed faster than the challenge.
+        for (let waited = 0; !window.turnstile.getResponse(turnstileWidget) && waited < 4000; waited += 200) {
+          await new Promise((r) => setTimeout(r, 200));
+        }
+        body.turnstileToken = window.turnstile.getResponse(turnstileWidget) || "";
+      }
       const response = await fetch(`${base}/desk/save`, {
         method: "POST",
         headers: { "content-type": "application/json" },
