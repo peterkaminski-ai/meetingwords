@@ -68,12 +68,14 @@ async function initSaveRibbon(instance) {
   // Already on this visitor's saved list? Then the ribbon has nothing to ask.
   // Front desk unreachable (or cross-origin without credentials) → show it.
   let signedIn = false;
+  let turnstileSiteKey = null;
   try {
     const saved = await fetch(`${base}/desk/saved?shareId=${encodeURIComponent(shareId)}`, { credentials: "same-origin" });
     if (saved.ok) {
       const state = await saved.json();
       if (state.saved) return;
       signedIn = Boolean(state.signedIn);
+      turnstileSiteKey = state.turnstileSiteKey || null;
     }
   } catch {
     // fall through
@@ -116,17 +118,40 @@ async function initSaveRibbon(instance) {
       }
     });
   }
+  // When the front desk requires Turnstile it advertises its sitekey (a
+  // public value) in the /desk/saved response; the widget renders inside the
+  // ribbon and its token rides along with the save POST.
+  let turnstileWidget = null;
+  if (!signedIn && turnstileSiteKey) {
+    const slot = el("div", { class: "save-turnstile" });
+    form.append(slot);
+    await new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.head.append(script);
+    });
+    if (window.turnstile) turnstileWidget = window.turnstile.render(slot, { sitekey: turnstileSiteKey });
+  }
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const email = document.getElementById("save-email").value.trim();
     if (!email) return;
     try {
+      const body = { email, shareId };
+      if (turnstileWidget !== null) body.turnstileToken = window.turnstile.getResponse(turnstileWidget) || "";
       const response = await fetch(`${base}/desk/save`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, shareId }),
+        body: JSON.stringify(body),
       });
-      if (!response.ok) throw new Error(String(response.status));
+      if (!response.ok) {
+        // A spent or failed token needs a fresh challenge before retrying.
+        if (turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
+        throw new Error(String(response.status));
+      }
       form.classList.add("hidden");
       document.getElementById("save-sent").classList.remove("hidden");
     } catch {
