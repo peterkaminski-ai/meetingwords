@@ -42,3 +42,21 @@ Body text.
     expect(html).not.toContain("language-yaml");
   });
 });
+
+describe("links in rendered documents", () => {
+  const REL = 'rel="nofollow noopener noreferrer ugc"';
+
+  it("marks inline, autolinked and reference-style links as user-generated", () => {
+    const html = renderMarkdown(
+      "An [inline](https://example.com/a) link, a bare https://example.org/b one, and a [reference][r].\n\n[r]: https://example.net/c\n",
+    );
+    expect(html.match(/<a /g)).toHaveLength(3);
+    expect(html.match(new RegExp(REL, "g"))).toHaveLength(3);
+  });
+
+  it("replaces a rel the author wrote in raw HTML", () => {
+    const html = renderMarkdown('<a href="https://example.com/" rel="dofollow">x</a>');
+    expect(html).toContain(REL);
+    expect(html).not.toContain("dofollow");
+  });
+});

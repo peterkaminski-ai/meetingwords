@@ -43,6 +43,15 @@ const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedSchemes: ["http", "https", "mailto"],
   // highlight.js emits inline color spans only via classes; permit no styles.
   allowedStyles: {},
+  // Every link in a document is one a visitor wrote. nofollow + ugc take
+  // away the reason to spam a public pad with links; noopener + noreferrer
+  // keep the linked page from reaching back into the pad or learning its
+  // URL, which for a share link is the credential. Set here, in the
+  // sanitizer, so no markdown path can produce a link without it, and an
+  // author's own rel is replaced rather than trusted.
+  transformTags: {
+    a: sanitizeHtml.simpleTransform("a", { rel: "nofollow noopener noreferrer ugc" }),
+  },
 };
 
 // YAML frontmatter: a `---` fence on the very first line, closed by a later
