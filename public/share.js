@@ -68,7 +68,7 @@ async function boot() {
 async function initSaveRibbon(instance) {
   const base = instance?.frontdeskUrl;
   if (base === null || base === undefined) return;
-  if (sessionStorage.getItem(`mw-save-dismissed:${shareId}`)) return;
+  const dismissedKey = `mw-save-dismissed:${shareId}`;
   // Already on this visitor's saved list? Then the ribbon has nothing to ask.
   // Front desk unreachable (or cross-origin without credentials) → show it.
   let signedIn = false;
@@ -86,10 +86,23 @@ async function initSaveRibbon(instance) {
   }
   const ribbon = document.getElementById("save-ribbon");
   const form = document.getElementById("save-form");
-  ribbon.hidden = false;
+  // The ribbon is the prompt; the menu entry is the standing way to save, so
+  // dismissing the prompt never takes the ability away. A dismissal quiets
+  // the ribbon for the tab, unless it was made signed-out and the visitor
+  // has since signed in: by then the ribbon is a one-click save, not a nag.
+  const dismissed = sessionStorage.getItem(dismissedKey);
+  ribbon.hidden = Boolean(dismissed) && !(signedIn && dismissed !== "signed-in");
   document.getElementById("save-dismiss").addEventListener("click", () => {
-    sessionStorage.setItem(`mw-save-dismissed:${shareId}`, "1");
+    sessionStorage.setItem(dismissedKey, signedIn ? "signed-in" : "signed-out");
     ribbon.hidden = true;
+  });
+  const saveItem = document.getElementById("save-doc");
+  saveItem.classList.remove("hidden");
+  saveItem.addEventListener("click", () => {
+    moreMenu.close();
+    sessionStorage.removeItem(dismissedKey);
+    ribbon.hidden = false;
+    document.getElementById(signedIn ? "save-now-btn" : "save-email").focus();
   });
   // A session already proves the address: one click, no email round-trip.
   if (signedIn) {
@@ -109,6 +122,7 @@ async function initSaveRibbon(instance) {
         saveNow.classList.add("hidden");
         if (result.saved) {
           document.getElementById("save-done").classList.remove("hidden");
+          saveItem.classList.add("hidden");
         } else if (result.cap) {
           const cap = document.getElementById("save-cap");
           const account = el("a", { href: `${base}/account#plan` }, t("save.capLink"));

@@ -51,6 +51,10 @@
         <span data-i18n="editor.lineNumbers">Line numbers</span>
         <svg class="menu-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
       </button>
+      <button class="hidden" id="save-doc" role="menuitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24z"/></svg>
+        <span data-i18n="save.button">Keep in your account</span>
+      </button>
       <button id="download-md" role="menuitem">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <span data-i18n="editor.downloadMd">Download .md</span>
@@ -68,20 +72,20 @@
 
 <div id="instance-banner" class="instance-banner" hidden></div>
 
-<!-- Save affordance: only when the instance is fronted by a front desk
+<!-- The keep-in-your-account affordance: only when the instance is fronted by a front desk
      (viewer.instance.frontdeskUrl); self-hosted instances never show it. -->
 <div id="save-ribbon" class="save-ribbon" hidden>
   <form id="save-form">
-    <span class="save-prompt" data-i18n="save.prompt">Don't lose this link — bookmark it, or save it here:</span>
+    <span class="save-prompt" data-i18n="save.prompt">Don't lose this link — bookmark it, or keep it here:</span>
     <input type="email" id="save-email" data-i18n-placeholder="save.emailPlaceholder" placeholder="you@example.com" autocomplete="email" required>
-    <button class="primary" type="submit" data-i18n="save.button">Save to your documents</button>
+    <button class="primary" type="submit" data-i18n="save.button">Keep in your account</button>
   </form>
   <div class="save-now hidden" id="save-now">
     <span class="save-prompt" data-i18n="save.promptSignedIn">You're signed in — keep this document on your list:</span>
-    <button class="primary" type="button" id="save-now-btn" data-i18n="save.button">Save to your documents</button>
+    <button class="primary" type="button" id="save-now-btn" data-i18n="save.button">Keep in your account</button>
   </div>
-  <span class="save-sent hidden" id="save-sent" data-i18n="save.sent">Check your email — click the link there to finish saving.</span>
-  <span class="save-sent hidden" id="save-done" data-i18n="save.saved">Saved ✓</span>
+  <span class="save-sent hidden" id="save-sent" data-i18n="save.sent">Check your email — click the link there to finish.</span>
+  <span class="save-sent hidden" id="save-done" data-i18n="save.saved">Kept ✓</span>
   <span class="save-sent hidden" id="save-cap"></span>
   <button type="button" class="icon-btn save-dismiss" id="save-dismiss" data-i18n-title="save.dismiss" title="Dismiss" aria-label="Dismiss">✕</button>
 </div>
