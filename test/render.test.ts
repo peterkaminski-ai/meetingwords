@@ -60,3 +60,27 @@ describe("links in rendered documents", () => {
     expect(html).not.toContain("dofollow");
   });
 });
+
+describe("strikethrough follows GFM flanking", () => {
+  it("leaves approximate-number tildes alone", () => {
+    const html = renderMarkdown("Intro (~5 min): a round-robin, then go back to edit. Demo (~3–5 min): agents working together.");
+    expect(html).not.toContain("<del>");
+    expect(html).toContain("(~5 min)");
+    expect(html).toContain("(~3–5 min)");
+  });
+
+  it("leaves them alone inside a table cell", () => {
+    const html = renderMarkdown("| Step | Time |\n|---|---|\n| Intro (~5 min), demo (~3 min) | ~8 min |\n");
+    expect(html).not.toContain("<del>");
+  });
+
+  it("still strikes real single- and double-tilde spans", () => {
+    expect(renderMarkdown("a ~strike~ b")).toContain("a <del>strike</del> b");
+    expect(renderMarkdown("a ~~strike~~ b")).toContain("a <del>strike</del> b");
+    expect(renderMarkdown("done (~finally~).")).toContain("(<del>finally</del>).");
+  });
+
+  it("skips a tilde that can't close and pairs with the next that can", () => {
+    expect(renderMarkdown("~about (~3 of them~ left")).toContain("<del>about (~3 of them</del> left");
+  });
+});

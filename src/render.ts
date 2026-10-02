@@ -28,6 +28,47 @@ renderer.code = ({ text, lang }: Tokens.Code) => {
 
 marked.setOptions({ gfm: true, breaks: true, renderer });
 
+// Strikethrough the way GitHub does it. marked pairs any two tildes, so
+// "(~5 min) ... (~3 min)" comes out struck through from the first to the
+// second. GFM only lets a tilde run close a strikethrough if it is
+// right-flanking: not preceded by whitespace, and if preceded by punctuation
+// then followed by whitespace, punctuation or the end. The "~" in "(~3" has
+// "(" before it and a digit after, so it can't close. This scans for the
+// first run that can, instead of taking the first run it finds.
+const SPACE = /\s/;
+const PUNCT = /[\p{P}\p{S}]/u;
+marked.use({
+  tokenizer: {
+    del(src: string) {
+      const open = /^(~~?)(?=[^\s~])/.exec(src);
+      if (!open) return undefined;
+      const fence = open[1].length;
+      for (let i = fence; i < src.length; i++) {
+        if (src[i] === "\\") {
+          i++;
+          continue;
+        }
+        if (src[i] !== "~") continue;
+        let end = i;
+        while (src[end] === "~") end++;
+        const before = src[i - 1];
+        const after = src[end] ?? "";
+        const closes =
+          end - i === fence &&
+          i > fence &&
+          !SPACE.test(before) &&
+          (!PUNCT.test(before) || after === "" || SPACE.test(after) || PUNCT.test(after));
+        if (closes) {
+          const text = src.slice(fence, i);
+          return { type: "del", raw: src.slice(0, end), text, tokens: this.lexer.inlineTokens(text) };
+        }
+        i = end - 1;
+      }
+      return undefined;
+    },
+  },
+});
+
 const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, "img", "input", "del", "ins", "sup", "sub"],
   allowedAttributes: {
