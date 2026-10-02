@@ -13,6 +13,9 @@ export const icons = {
   ),
   moon: svg('<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'),
   check: svg('<polyline points="20 6 9 17 4 12"/>'),
+  people: svg(
+    '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  ),
 };
 
 /**
@@ -34,7 +37,9 @@ export function initTheme() {
     if (!button) return;
     const label = theme === "dark" ? t("nav.switchLight") : t("nav.switchDark");
     button.innerHTML = theme === "dark" ? icons.sun : icons.moon;
-    button.title = label;
+    // Inside a menu the toggle is a labeled row; in a bar it's a bare icon.
+    if (button.closest(".menu")) button.append(el("span", {}, label));
+    else button.title = label;
     button.setAttribute("aria-label", label);
   }
 
@@ -54,6 +59,31 @@ export function initTheme() {
 /** Reflect a toggle button's on/off state (styled via [aria-pressed]). */
 export function setPressed(id, on) {
   document.getElementById(id)?.setAttribute("aria-pressed", String(on));
+}
+
+// --- dropdown menus --------------------------------------------------------------
+
+/**
+ * Wire a button to the dropdown beside it: click toggles, a click anywhere
+ * else or Escape closes. Opening one menu closes any other, because the
+ * other's outside-click handler sees the same click.
+ */
+export function initMenu(button, menu) {
+  const set = (open) => {
+    menu.classList.toggle("hidden", !open);
+    button.setAttribute("aria-expanded", String(open));
+  };
+  button.addEventListener("click", () => set(menu.classList.contains("hidden")));
+  document.addEventListener("click", (event) => {
+    // The path, not contains(): an item that redraws itself on click (the
+    // theme toggle) has already detached the node that was clicked.
+    const path = event.composedPath();
+    if (!path.includes(menu) && !path.includes(button)) set(false);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") set(false);
+  });
+  return { close: () => set(false) };
 }
 
 // --- editor/preview pane split ----------------------------------------------------
@@ -149,8 +179,14 @@ export function initViewMode({ main, editorHost, preview, divider, onModeChange 
     onModeChange?.(mode);
   }
 
+  // At phone width the bar shows one segment, the current mode (styles.css);
+  // tapping it steps through the three instead of selecting itself.
+  const ORDER = ["edit", "split", "read"];
+  const compact = matchMedia("(max-width: 420px)");
   for (const btn of switchEl.querySelectorAll("[data-mode]")) {
-    btn.addEventListener("click", () => apply(btn.dataset.mode));
+    btn.addEventListener("click", () => {
+      apply(compact.matches ? ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length] : btn.dataset.mode);
+    });
   }
   apply(mode, false);
 
@@ -333,41 +369,151 @@ export function lineOfIndex(text, index) {
   return text.slice(0, Math.max(0, index)).split("\n").length;
 }
 
+/** "Dr. Thomas Scotton" -> "DS"; "Saga" -> "S". First and last word. */
+function initialsOf(name) {
+  const words = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "?";
+  const first = Array.from(words[0])[0];
+  const last = words.length > 1 ? Array.from(words[words.length - 1])[0] : "";
+  return (first + last).toUpperCase();
+}
+
 /**
- * Roster + live presence chips. Agents flash in on their edits and fade
- * after `agentTtlMs` since agents don't hold a connection.
+ * Roster + live presence. Agents flash in on their edits and fade after
+ * `agentTtlMs` since agents don't hold a connection.
+ *
+ * The roster owns one row of the topbar and never more. It shows the richest
+ * form that fits the room it has: named chips, else initials, else a head
+ * count; whatever is clipped is summed into "+N". Clicking it lists everyone,
+ * so who's here is answerable at any window width. `selfId` (optional) returns
+ * this client's id so the list can say which one is you.
  */
-export function makeRoster(container, { agentTtlMs = 12_000 } = {}) {
+export function makeRoster(container, { agentTtlMs = 12_000, selfId = () => null } = {}) {
   const connected = new Map(); // clientId -> {name, color, kind, line}
   const agents = new Map(); // clientId -> {name, color, kind, expires}
 
-  function render() {
-    container.replaceChildren();
+  const chips = el("span", { class: "roster-chips" });
+  const more = el("span", { class: "roster-more" });
+  const button = el("button", { type: "button", class: "roster-button", "aria-haspopup": "true", "aria-expanded": "false" }, chips, more);
+  const panel = el("div", { class: "menu people-menu hidden" });
+  container.replaceChildren(button, panel);
+  initMenu(button, panel);
+  button.hidden = true;
+
+  let drawn = "";
+
+  function everyone() {
     const now = Date.now();
     for (const [id, agent] of agents) {
       if (agent.expires < now) agents.delete(id);
     }
-    for (const [id, p] of [...connected.entries(), ...agents.entries()]) {
-      const chip = el(
-        "span",
-        { class: `chip${p.kind === "agent" ? " agent" : ""}`, title: p.kind },
-        el("span", { class: "dot", style: `background:${p.color}` }),
-        p.kind === "agent" ? "🤖 " : "",
-        p.name,
-        p.line ? el("span", { class: "line-no" }, ` · L${p.line}`) : null,
-      );
-      chip.dataset.clientId = id;
-      container.append(chip);
-    }
+    return [...connected.entries(), ...agents.entries()].map(([id, p]) => ({ id, ...p }));
   }
+
+  function render() {
+    const list = everyone();
+    const me = selfId();
+    // The 3s tick only exists to expire agents; skip the DOM when nothing moved.
+    const state = JSON.stringify([me, list.map((p) => [p.id, p.name, p.color, p.kind, p.line])]);
+    if (state === drawn) return;
+    drawn = state;
+
+    chips.replaceChildren(
+      ...list.map((p) => {
+        const agent = p.kind === "agent";
+        const chip = el(
+          "span",
+          { class: `chip${agent ? " agent" : ""}`, style: `--c:${p.color}`, title: p.line ? `${p.name} · L${p.line}` : p.name },
+          el("span", { class: "dot" }),
+          el("span", { class: "chip-initials" }, agent ? "🤖" : initialsOf(p.name)),
+          el("span", { class: "chip-name" }, agent ? `🤖 ${p.name}` : p.name),
+          p.line ? el("span", { class: "line-no" }, `· L${p.line}`) : null,
+        );
+        chip.dataset.clientId = p.id;
+        return chip;
+      }),
+    );
+    panel.replaceChildren(
+      el("h4", {}, `${t("roster.here")} · ${list.length}`),
+      ...list.map((p) =>
+        el(
+          "div",
+          { class: "person", style: `--c:${p.color}` },
+          el("span", { class: "dot" }),
+          el("span", { class: "person-name" }, p.kind === "agent" ? `🤖 ${p.name}` : p.name),
+          p.id === me ? el("span", { class: "you" }, `(${t("roster.you")})`) : null,
+          p.line ? el("span", { class: "line-no" }, `L${p.line}`) : null,
+        ),
+      ),
+    );
+    button.hidden = list.length === 0;
+    button.setAttribute("aria-label", `${t("roster.here")}: ${list.length}`);
+    // Floors for the bar's layout (styles.css): up to four initials plus "+N"
+    // where there's width to spare, just the head count where there isn't.
+    const n = list.length;
+    container.style.setProperty("--roster-min", n ? `${Math.min(n, 4) * 23 + 24 + (n > 4 ? 36 : 0)}px` : "0px");
+    container.style.setProperty("--roster-floor", n > 1 ? "66px" : n ? "46px" : "0px");
+    fit();
+  }
+
+  // Which chips made it onto the one visible row, in the given density?
+  function clipped(all, density) {
+    container.dataset.density = density;
+    chips.style.maxWidth = "";
+    const count = () => {
+      const top = all[0].offsetTop;
+      const room = chips.clientWidth + 1;
+      return all.filter((chip) => chip.offsetTop > top || chip.offsetLeft - chips.offsetLeft + chip.offsetWidth > room);
+    };
+    more.textContent = "";
+    let hidden = count();
+    // "+N" takes room of its own, which can clip one more; settle in two passes.
+    for (let pass = 0; hidden.length && pass < 2; pass++) {
+      more.textContent = `+${hidden.length}`;
+      hidden = count();
+    }
+    more.textContent = hidden.length ? `+${hidden.length}` : "";
+    return hidden;
+  }
+
+  function fit() {
+    const all = [...chips.children];
+    if (!all.length) return;
+    let hidden = clipped(all, "names");
+    // Names stay as long as everyone connected fits. A passing agent may
+    // overflow into "+N" without collapsing the whole row for twelve seconds.
+    if (hidden.some((chip) => !chip.classList.contains("agent"))) {
+      hidden = clipped(all, "avatars");
+      if (all.length - hidden.length < Math.min(all.length, 2)) {
+        container.dataset.density = "count";
+        more.innerHTML = icons.people;
+        more.append(String(all.length));
+        return;
+      }
+    }
+    // Hug the visible chips so "+N" sits beside the last one, not a gap away.
+    const last = all[all.length - hidden.length - 1];
+    if (hidden.length && last) chips.style.maxWidth = `${last.offsetLeft - chips.offsetLeft + last.offsetWidth + 2}px`;
+  }
+
+  let queued = false;
+  new ResizeObserver(() => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      fit();
+    });
+  }).observe(container);
 
   setInterval(render, 3000);
 
   return {
     setRoster(participants) {
+      const previous = new Map(connected);
       connected.clear();
       for (const p of participants) {
-        connected.set(p.clientId, { ...p, line: connected.get(p.clientId)?.line ?? null });
+        connected.set(p.clientId, { ...p, line: previous.get(p.clientId)?.line ?? null });
       }
       render();
     },

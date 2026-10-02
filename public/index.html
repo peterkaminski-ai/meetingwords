@@ -9,7 +9,11 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
 
 <div class="topbar">
-  <span class="brand" data-brand><a class="brand-glyph" href="/" data-i18n-title="nav.home" title="Home" aria-label="Home">▦</a> MeetingWords</span>
+  <a class="home-mark" href="/" data-i18n-title="nav.home" title="Home" aria-label="Home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20z"/><path d="M9.5 21.5v-7h5v7"/></svg>
+    <svg class="home-mark-letters" viewBox="0 0 38 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 19.5 2 5 8.5 14 15 5 15 19.5"/><polyline points="20.5 5 24.5 19.5 28.5 9.5 32.5 19.5 36.5 5"/></svg>
+  </a>
+  <span class="brand" data-brand>MeetingWords</span>
   <span class="spacer"></span>
   <select id="lang-select" class="lang-select"></select>
   <button class="icon-btn" id="keys-button" data-i18n-title="nav.agentKeys" title="Agent keys" aria-label="Agent keys">

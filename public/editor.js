@@ -1,6 +1,6 @@
 import { bindEditor } from "/editor-cm.js";
 import { initI18n, t } from "/i18n.js";
-import { api, applyInstance, debounce, downloadFile, el, initScrollSync, initTheme, initViewMode, lineOfIndex, makeRoster, markdownFilename, renderMermaidIn, renderThreads, setPressed, wsUrl } from "/ui.js";
+import { api, applyInstance, debounce, downloadFile, el, initMenu, initScrollSync, initTheme, initViewMode, lineOfIndex, makeRoster, markdownFilename, renderMermaidIn, renderThreads, setPressed, wsUrl } from "/ui.js";
 
 initI18n();
 initTheme();
@@ -24,7 +24,9 @@ let shareId = "";
 let shareAccess = "none";
 let threads = [];
 
-const roster = makeRoster(document.getElementById("roster"));
+const roster = makeRoster(document.getElementById("roster"), { selfId: () => handle.session.selfId });
+const shareMenuControl = initMenu(shareButton, shareMenu);
+initMenu(document.getElementById("more-button"), document.getElementById("more-menu"));
 
 const refreshPreview = debounce(async () => {
   if (preview.classList.contains("hidden")) return;
@@ -111,17 +113,6 @@ function updateShareUi() {
   copyLink.classList.toggle("hidden", isPrivate);
 }
 
-shareButton.addEventListener("click", (event) => {
-  event.stopPropagation();
-  shareMenu.classList.toggle("hidden");
-});
-document.addEventListener("click", (event) => {
-  if (!shareMenu.contains(event.target)) shareMenu.classList.add("hidden");
-});
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") shareMenu.classList.add("hidden");
-});
-
 for (const option of shareMenu.querySelectorAll("[data-access]")) {
   option.addEventListener("click", async () => {
     const result = await api(`/api/docs/${docId}`, {
@@ -144,7 +135,7 @@ copyLink.addEventListener("click", async () => {
 
 document.getElementById("download-md").addEventListener("click", () => {
   downloadFile(markdownFilename(titleInput.value), handle.session.text);
-  shareMenu.classList.add("hidden");
+  shareMenuControl.close();
 });
 
 // --- panels -------------------------------------------------------------------

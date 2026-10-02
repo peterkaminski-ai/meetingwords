@@ -1,6 +1,6 @@
 import { bindEditor } from "/editor-cm.js";
 import { initI18n, lang, t } from "/i18n.js";
-import { api, applyInstance, debounce, downloadFile, el, initScrollSync, initTheme, initViewMode, lineOfIndex, makeRoster, markdownFilename, renderMermaidIn, renderThreads, setPressed, wsUrl } from "/ui.js";
+import { api, applyInstance, debounce, downloadFile, el, initMenu, initScrollSync, initTheme, initViewMode, lineOfIndex, makeRoster, markdownFilename, renderMermaidIn, renderThreads, setPressed, wsUrl } from "/ui.js";
 
 initI18n();
 initTheme();
@@ -22,8 +22,12 @@ let currentTitle = "";
 let guestName = null;
 let threads = [];
 let handle = null;
+let readerClientId = null;
 
-const roster = makeRoster(document.getElementById("roster"));
+const roster = makeRoster(document.getElementById("roster"), {
+  selfId: () => handle?.session.selfId || readerClientId,
+});
+const moreMenu = initMenu(document.getElementById("more-button"), document.getElementById("more-menu"));
 
 async function boot() {
   const state = await api(`/api/share/${shareId}`);
@@ -171,7 +175,10 @@ async function initSaveRibbon(instance) {
 
 function setTitle(title) {
   currentTitle = title;
-  document.getElementById("doc-title").textContent = title;
+  const titleEl = document.getElementById("doc-title");
+  titleEl.textContent = title;
+  // The bar may truncate a long title; the tooltip always has all of it.
+  titleEl.title = access === "edit" ? `${title} (${t("shareView.renameHint")})` : title;
   document.title = `${title} — ${brandName}`;
 }
 
@@ -180,12 +187,13 @@ function setTitle(title) {
 // broadcasts the new title to every connected client.
 function initTitleEdit() {
   const titleEl = document.getElementById("doc-title");
+  const topbar = titleEl.closest(".topbar");
   titleEl.classList.add("editable-title");
-  titleEl.title = t("shareView.renameHint");
   titleEl.addEventListener("click", () => {
     if (titleEl.querySelector("input")) return;
     const input = el("input", { type: "text", class: "title-input", value: currentTitle });
     titleEl.replaceChildren(input);
+    topbar.classList.add("title-editing");
     input.focus();
     input.select();
     input.addEventListener("keydown", (event) => {
@@ -201,6 +209,7 @@ function initTitleEdit() {
       "blur",
       async () => {
         const next = input.value.trim();
+        topbar.classList.remove("title-editing");
         setTitle(currentTitle);
         if (next && next !== currentTitle) {
           const result = await api(`/api/share/${shareId}/edit`, { method: "POST", body: { edits: [], title: next } });
@@ -214,7 +223,8 @@ function initTitleEdit() {
 
 function updateNameUi() {
   document.getElementById("viewer-name").textContent = guestName || "";
-  document.getElementById("set-name").classList.toggle("hidden", access === "view" || Boolean(guestName));
+  // Anyone who can comment or edit can name (or rename) themselves.
+  document.getElementById("set-name").classList.toggle("hidden", access === "view");
 }
 
 async function askName() {
@@ -240,7 +250,8 @@ async function askName() {
 }
 
 document.getElementById("download-md").addEventListener("click", async () => {
-  const title = document.getElementById("doc-title").textContent;
+  const title = currentTitle;
+  moreMenu.close();
   if (handle) {
     downloadFile(markdownFilename(title), handle.session.text);
     return;
@@ -250,9 +261,11 @@ document.getElementById("download-md").addEventListener("click", async () => {
 });
 
 document.getElementById("set-name").addEventListener("click", async () => {
+  const before = guestName;
+  moreMenu.close();
   await askName();
   // Presence name is fixed at connect; reconnect to pick it up.
-  if (handle) location.reload();
+  if (handle && guestName !== before) location.reload();
 });
 
 document.getElementById("toggle-comments").addEventListener("click", () => {
@@ -288,8 +301,8 @@ function startReader() {
     document.body.append(sidebar);
     sidebar.style.position = "fixed";
     sidebar.style.right = "0";
-    sidebar.style.top = "53px";
-    sidebar.style.height = "calc(100vh - 53px)";
+    sidebar.style.top = "var(--topbar-h)";
+    sidebar.style.bottom = "0";
   }
   refreshReader();
 
@@ -315,7 +328,10 @@ function startReader() {
     if (message.type === "updated") refreshReader();
     if (message.type === "threads-updated") loadThreads();
     if (message.type === "roster") roster.setRoster(message.participants);
-    if (message.type === "hello") setTitle(message.title);
+    if (message.type === "hello") {
+      if (message.clientId) readerClientId = message.clientId;
+      setTitle(message.title);
+    }
   });
 
   if (access !== "view") {

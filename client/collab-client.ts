@@ -112,6 +112,11 @@ export class CollabSession {
     return this.view?.text ?? "";
   }
 
+  /** This client's id, as the server names it in roster and presence. Empty until hello. */
+  get selfId(): string {
+    return this.clientId;
+  }
+
   get ready(): boolean {
     return this.view !== null;
   }

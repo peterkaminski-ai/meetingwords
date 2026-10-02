@@ -55,6 +55,19 @@ const S = {
     ru: "Тёмная тема", ja: "ダークモードに切り替え", de: "Zum dunklen Modus wechseln",
     ko: "다크 모드로 전환", it: "Passa al tema scuro",
   },
+  "nav.more": {
+    en: "More", es: "Más", zh: "更多", hi: "और", ar: "المزيد",
+    pt: "Mais", fr: "Plus", ru: "Ещё", ja: "その他", de: "Mehr", ko: "더보기", it: "Altro",
+  },
+  "roster.here": {
+    en: "Here now", es: "Aquí ahora", zh: "当前在线", hi: "अभी यहाँ", ar: "الموجودون الآن",
+    pt: "Aqui agora", fr: "Présents maintenant", ru: "Сейчас здесь", ja: "現在の参加者",
+    de: "Gerade hier", ko: "현재 참여자", it: "Presenti ora",
+  },
+  "roster.you": {
+    en: "you", es: "tú", zh: "你", hi: "आप", ar: "أنت",
+    pt: "você", fr: "vous", ru: "вы", ja: "あなた", de: "du", ko: "나", it: "tu",
+  },
   "nav.language": {
     en: "Language", es: "Idioma", zh: "语言", hi: "भाषा", ar: "اللغة",
     pt: "Idioma", fr: "Langue", ru: "Язык", ja: "言語", de: "Sprache", ko: "언어", it: "Lingua",
