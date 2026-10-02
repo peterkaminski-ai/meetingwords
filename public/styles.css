@@ -61,7 +61,7 @@ button {
   padding: 6px 12px;
   cursor: pointer;
 }
-button:hover { border-color: var(--accent); }
+@media (hover: hover) { button:hover { border-color: var(--accent); } }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 button.danger { color: var(--danger); }
 button:disabled { opacity: 0.5; cursor: default; }
@@ -111,8 +111,8 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 }
 .home-mark svg { height: 16px; width: auto; display: block; }
 .home-mark .home-mark-letters { color: var(--text); }
-.home-mark:hover { background: var(--accent); border-color: var(--accent); color: #fff; text-decoration: none; }
-.home-mark:hover .home-mark-letters { color: #fff; }
+@media (hover: hover) { .home-mark:hover { background: var(--accent); border-color: var(--accent); color: #fff; text-decoration: none; } }
+@media (hover: hover) { .home-mark:hover .home-mark-letters { color: #fff; } }
 .home-mark:focus-visible, .icon-btn:focus-visible, .roster-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* Document title: a span on shared pages (click to rename when you can
@@ -128,7 +128,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   letter-spacing: 0.2px;
 }
 .doc-title.editable-title { cursor: text; border-radius: 6px; padding: 2px 6px; margin: 0 -6px; }
-.doc-title.editable-title:hover { background: var(--panel-2); }
+@media (hover: hover) { .doc-title.editable-title:hover { background: var(--panel-2); } }
 .doc-title .title-input { font: inherit; width: 100%; color: var(--text); background: var(--panel); border: 1px solid var(--accent); border-radius: 6px; padding: 1px 6px; }
 input.doc-title {
   font-weight: 650;
@@ -169,7 +169,7 @@ input.doc-title:focus { border-color: var(--accent); background: var(--panel); t
   flex-shrink: 0;
 }
 .icon-btn svg { width: 18px; height: 18px; display: block; }
-.icon-btn:hover { color: var(--text); background: var(--panel-2); border-color: var(--border); text-decoration: none; }
+@media (hover: hover) { .icon-btn:hover { color: var(--text); background: var(--panel-2); border-color: var(--border); text-decoration: none; } }
 .icon-btn[aria-pressed="true"] {
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 12%, transparent);
@@ -244,7 +244,7 @@ input.doc-title:focus { border-color: var(--accent); background: var(--panel); t
   padding: 7px 10px;
   font-size: 13.5px;
 }
-.menu button:hover { background: var(--panel-2); }
+@media (hover: hover) { .menu button:hover { background: var(--panel-2); } }
 .menu button svg { width: 15px; height: 15px; flex-shrink: 0; }
 .menu [role="menuitemradio"] svg { visibility: hidden; color: var(--accent); }
 .menu [role="menuitemradio"][aria-checked="true"] svg { visibility: visible; }
@@ -470,7 +470,8 @@ body:has(> .editor-shell:not(.hidden)) > .attribution { margin: 0; padding: 0; h
   background: transparent;
   color: inherit;
 }
-.roster-button:hover, .roster-button[aria-expanded="true"] { background: var(--panel-2); border-color: var(--border); }
+.roster-button[aria-expanded="true"] { background: var(--panel-2); border-color: var(--border); }
+@media (hover: hover) { .roster-button:hover { background: var(--panel-2); border-color: var(--border); } }
 .roster-chips {
   display: flex;
   flex-wrap: wrap;
@@ -528,7 +529,8 @@ body:has(> .editor-shell:not(.hidden)) > .attribution { margin: 0; padding: 0; h
   font-weight: 700;
   letter-spacing: -0.2px;
 }
-.roster-button:hover .chip, .roster-button[aria-expanded="true"] .chip { box-shadow: 0 0 0 2px var(--panel-2); }
+.roster-button[aria-expanded="true"] .chip { box-shadow: 0 0 0 2px var(--panel-2); }
+@media (hover: hover) { .roster-button:hover .chip { box-shadow: 0 0 0 2px var(--panel-2); } }
 .roster[data-density="avatars"] .chip.agent { border-style: dashed; }
 .roster[data-density="avatars"] .chip > :not(.chip-initials) { display: none; }
 .roster[data-density="avatars"] .chip .chip-initials { display: inline; }
@@ -691,6 +693,39 @@ dialog::backdrop { background: var(--backdrop); }
      steps to the next one (see initViewMode). */
   .mode-switch .icon-btn[aria-checked="false"] { display: none; }
   .mode-switch .icon-btn + .icon-btn { border-left: none; }
+}
+
+/* --- touch --------------------------------------------------------------------- */
+/* Fingers, not cursors. This follows the pointer, not the width: a narrow
+   window on a laptop keeps its compact sizes, while a phone or tablet gets
+   targets near the 44px that Apple's guidelines and WCAG's enhanced level ask
+   for, and the bar grows a little to hold them. Text in menus goes to 16px,
+   which is also what stops iOS Safari zooming the page when the language
+   picker takes focus. */
+@media (pointer: coarse) {
+  :root { --topbar-h: 52px; }
+  .topbar { gap: 2px; }
+  .topbar .icon-btn, .topbar .mode-switch .icon-btn { width: 40px; height: 44px; }
+  .topbar .icon-btn svg { width: 20px; height: 20px; }
+  .home-mark { height: 40px; padding: 0 10px; margin-right: 4px; }
+  .home-mark svg { height: 17px; }
+  .roster-button { height: 44px; }
+  .status-dot { margin: 0 4px; }
+  .menu { padding: 8px; }
+  .menu button, .menu .menu-row { min-height: 48px; padding: 10px 12px; font-size: 16px; gap: 12px; }
+  .menu button svg, .menu .menu-row svg { width: 20px; height: 20px; }
+  .menu .lang-select { min-height: 40px; font-size: 16px; padding: 6px 8px; }
+  .people-menu h4 { margin: 8px 12px; }
+  .person { min-height: 44px; padding: 8px 12px; font-size: 16px; gap: 12px; }
+  .save-ribbon .save-dismiss, .instance-banner .banner-dismiss { width: 44px; height: 44px; }
+  /* A finger has no hover (the hover rules above are fenced with
+     hover: hover, or a tapped button would stay lit). It gets a press state,
+     and a tap flash in the house color instead of the browser's grey. */
+  .icon-btn:active, .menu button:active, .roster-button:active, .home-mark:active { background: var(--panel-2); }
+  /* The divider stays 5px to look at but is 33px to grab. */
+  .pane-divider { position: relative; z-index: 2; }
+  .pane-divider::after { content: ""; position: absolute; inset: -14px; }
+  .topbar, .menu { -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 16%, transparent); }
 }
 
 /* --- instance identity (attribution footer + operator banner) ---------------- */
