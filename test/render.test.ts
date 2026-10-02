@@ -80,6 +80,11 @@ describe("strikethrough follows GFM flanking", () => {
     expect(renderMarkdown("done (~finally~).")).toContain("(<del>finally</del>).");
   });
 
+  it("still finds a real span after tildes that never close", () => {
+    expect(renderMarkdown("~about (~3 of them and ~~these~~ too")).toContain("<del>these</del>");
+    expect(renderMarkdown("~a (~b\n\nnext ~~paragraph~~ here")).toContain("<del>paragraph</del>");
+  });
+
   it("skips a tilde that can't close and pairs with the next that can", () => {
     expect(renderMarkdown("~about (~3 of them~ left")).toContain("<del>about (~3 of them</del> left");
   });

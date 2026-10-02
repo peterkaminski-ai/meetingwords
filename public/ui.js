@@ -58,7 +58,9 @@ export function initTheme() {
 
 /** Reflect a toggle button's on/off state (styled via [aria-pressed]). */
 export function setPressed(id, on) {
-  document.getElementById(id)?.setAttribute("aria-pressed", String(on));
+  const node = document.getElementById(id);
+  // A checkbox in a menu reports aria-checked; a toggle button, aria-pressed.
+  node?.setAttribute(node.getAttribute("role") === "menuitemcheckbox" ? "aria-checked" : "aria-pressed", String(on));
 }
 
 // --- dropdown menus --------------------------------------------------------------
@@ -81,7 +83,10 @@ export function initMenu(button, menu) {
     if (!path.includes(menu) && !path.includes(button)) set(false);
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") set(false);
+    if (event.key !== "Escape" || menu.classList.contains("hidden")) return;
+    // Focus inside a menu that is about to hide would fall to <body>.
+    if (menu.contains(document.activeElement)) button.focus();
+    set(false);
   });
   return { close: () => set(false) };
 }
@@ -107,7 +112,8 @@ export function initPaneSplit(main, divider) {
     // Narrow windows stack the panes (styles.css), so the divider moves up and down.
     const stacked = getComputedStyle(main).flexDirection === "column";
     const onMove = (move) => {
-      const along = stacked ? (move.clientY - rect.top) / rect.height : (move.clientX - rect.left) / rect.width;
+      const across = (move.clientX - rect.left) / rect.width;
+      const along = stacked ? (move.clientY - rect.top) / rect.height : getComputedStyle(main).direction === "rtl" ? 1 - across : across;
       const pct = Math.min(80, Math.max(20, along * 100));
       main.style.setProperty("--split", `${pct}%`);
     };
@@ -189,6 +195,8 @@ export function initViewMode({ main, editorHost, preview, divider, onModeChange 
   for (const btn of switchEl.querySelectorAll("[data-mode]")) {
     btn.addEventListener("click", () => {
       apply(compact.matches ? ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length] : btn.dataset.mode);
+      // The button just used may now be hidden; keep focus on the one showing.
+      if (compact.matches) switchEl.querySelector('[aria-checked="true"]')?.focus();
     });
   }
   apply(mode, false);
@@ -372,13 +380,16 @@ export function lineOfIndex(text, index) {
   return text.slice(0, Math.max(0, index)).split("\n").length;
 }
 
-/** "Dr. Thomas Scotton" -> "DS"; "Saga" -> "S". First and last word. */
+/** "Alice B. Carol" -> "AC"; "Bob" -> "B". First and last word. */
 function initialsOf(name) {
   const words = String(name || "").trim().split(/\s+/).filter(Boolean);
   if (!words.length) return "?";
-  const first = Array.from(words[0])[0];
-  const last = words.length > 1 ? Array.from(words[words.length - 1])[0] : "";
-  return (first + last).toUpperCase();
+  // A whole grapheme, so a flag or family emoji isn't cut in half.
+  const lead = (word) =>
+    typeof Intl.Segmenter === "function"
+      ? [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(word)][0].segment
+      : Array.from(word)[0];
+  return (lead(words[0]) + (words.length > 1 ? lead(words[words.length - 1]) : "")).toUpperCase();
 }
 
 /**
@@ -397,10 +408,10 @@ export function makeRoster(container, { agentTtlMs = 12_000, selfId = () => null
 
   const chips = el("span", { class: "roster-chips" });
   const more = el("span", { class: "roster-more" });
-  const button = el("button", { type: "button", class: "roster-button", "aria-haspopup": "true", "aria-expanded": "false" }, chips, more);
-  const panel = el("div", { class: "menu people-menu hidden" });
+  const button = el("button", { type: "button", class: "roster-button", "aria-controls": "people-panel", "aria-expanded": "false" }, chips, more);
+  const panel = el("div", { class: "menu people-menu hidden", id: "people-panel", role: "group", "aria-label": t("roster.here") });
   container.replaceChildren(button, panel);
-  initMenu(button, panel);
+  const peoplePanel = initMenu(button, panel);
   button.hidden = true;
 
   let drawn = "";
@@ -450,6 +461,7 @@ export function makeRoster(container, { agentTtlMs = 12_000, selfId = () => null
       ),
     );
     button.hidden = list.length === 0;
+    if (!list.length) peoplePanel.close();
     button.setAttribute("aria-label", `${t("roster.here")}: ${list.length}`);
     // Floors for the bar's layout (styles.css): up to four initials plus "+N"
     // where there's width to spare, just the head count where there isn't.
@@ -459,14 +471,22 @@ export function makeRoster(container, { agentTtlMs = 12_000, selfId = () => null
     fit();
   }
 
+  // How far a chip's far edge is from where the row starts: from the left in
+  // left-to-right text, from the right in right-to-left.
+  function reach(chip) {
+    const box = chips.getBoundingClientRect();
+    const c = chip.getBoundingClientRect();
+    return getComputedStyle(chips).direction === "rtl" ? box.right - c.left : c.right - box.left;
+  }
+
   // Which chips made it onto the one visible row, in the given density?
   function clipped(all, density) {
     container.dataset.density = density;
     chips.style.maxWidth = "";
     const count = () => {
-      const top = all[0].offsetTop;
+      const top = all[0].getBoundingClientRect().top + 1;
       const room = chips.clientWidth + 1;
-      return all.filter((chip) => chip.offsetTop > top || chip.offsetLeft - chips.offsetLeft + chip.offsetWidth > room);
+      return all.filter((chip) => chip.getBoundingClientRect().top > top || reach(chip) > room);
     };
     more.textContent = "";
     let hidden = count();
@@ -496,7 +516,7 @@ export function makeRoster(container, { agentTtlMs = 12_000, selfId = () => null
     }
     // Hug the visible chips so "+N" sits beside the last one, not a gap away.
     const last = all[all.length - hidden.length - 1];
-    if (hidden.length && last) chips.style.maxWidth = `${last.offsetLeft - chips.offsetLeft + last.offsetWidth + 2}px`;
+    if (hidden.length && last) chips.style.maxWidth = `${reach(last) + 2}px`;
   }
 
   let queued = false;

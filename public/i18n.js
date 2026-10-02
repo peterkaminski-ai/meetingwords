@@ -333,11 +333,6 @@ const S = {
     ko: "이 공유 문서는 존재하지 않거나 공유가 해제되었습니다.",
     it: "Questo documento condiviso non esiste o la condivisione è stata disattivata.",
   },
-  "shareView.setName": {
-    en: "Set your name", es: "Pon tu nombre", zh: "设置你的名字", hi: "अपना नाम सेट करें", ar: "حدد اسمك",
-    pt: "Defina seu nome", fr: "Définir votre nom", ru: "Укажите имя", ja: "名前を設定",
-    de: "Namen festlegen", ko: "이름 설정", it: "Imposta il tuo nome",
-  },
   "shareView.whoAreYou": {
     en: "Who are you?", es: "¿Quién eres?", zh: "你是谁？", hi: "आप कौन हैं?", ar: "من أنت؟",
     pt: "Quem é você?", fr: "Qui êtes-vous ?", ru: "Кто вы?", ja: "あなたは誰ですか？",
@@ -484,7 +479,7 @@ const S = {
     ja: "you@example.com", de: "du@example.com", ko: "you@example.com", it: "tu@example.com",
   },
   // "Keep", and "account", on purpose: "save to your documents" read as the
-  // Documents folder on your computer, and a real save-to-disk is planned.
+  // Documents folder on your computer.
   "save.button": {
     en: "Keep in your account", es: "Conservar en tu cuenta", zh: "保留在我的账户",
     hi: "अपने खाते में रखें", ar: "الاحتفاظ به في حسابك", pt: "Manter na sua conta",

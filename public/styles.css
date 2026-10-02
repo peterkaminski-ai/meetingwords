@@ -102,10 +102,13 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   align-items: center;
   gap: 6px;
   height: 30px;
-  padding: 0 9px 0 8px;
+  padding-inline: 8px 9px;
   flex: none;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  /* Plain values first, for browsers without color-mix(). */
+  border: 1px solid var(--border);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  background: var(--panel-2);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--accent);
 }
@@ -139,7 +142,7 @@ input.doc-title {
   background: transparent;
   border-radius: 6px;
 }
-input.doc-title:hover { border-color: var(--border); }
+@media (hover: hover) { input.doc-title:hover { border-color: var(--border); } }
 input.doc-title:focus { border-color: var(--accent); background: var(--panel); text-overflow: clip; }
 @supports (field-sizing: content) {
   input.doc-title { width: auto; field-sizing: content; max-width: 60%; }
@@ -212,7 +215,7 @@ input.doc-title:focus { border-color: var(--accent); background: var(--panel); t
   border: none;
   border-radius: 0;
 }
-.mode-switch .icon-btn + .icon-btn { border-left: 1px solid var(--border); }
+.mode-switch .icon-btn + .icon-btn { border-inline-start: 1px solid var(--border); }
 .mode-switch .icon-btn[aria-checked="true"] {
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 14%, transparent);
@@ -222,7 +225,7 @@ input.doc-title:focus { border-color: var(--accent); background: var(--panel); t
 .menu-wrap { position: relative; }
 .menu {
   position: absolute;
-  right: 0;
+  inset-inline-end: 0;
   top: calc(100% + 6px);
   min-width: 210px;
   background: var(--panel);
@@ -252,7 +255,7 @@ input.doc-title:focus { border-color: var(--accent); background: var(--panel); t
 .menu button > span:first-of-type { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .menu .menu-value { color: var(--muted); max-width: 9rem; overflow: hidden; text-overflow: ellipsis; }
 .menu .menu-check { visibility: hidden; color: var(--accent); }
-.menu [aria-pressed="true"] .menu-check { visibility: visible; }
+.menu [aria-checked="true"] .menu-check { visibility: visible; }
 .menu .menu-row { display: flex; align-items: center; gap: 9px; padding: 5px 10px; font-size: 13.5px; }
 .menu .menu-row svg { width: 15px; height: 15px; flex-shrink: 0; }
 .menu .menu-row > span { flex: 1; }
@@ -321,7 +324,8 @@ body:has(> .editor-shell:not(.hidden)) > .attribution { margin: 0; padding: 0; h
   opacity: 0.55;
   touch-action: none;
 }
-.pane-divider:hover, .editor-main.dragging .pane-divider { background: var(--accent); opacity: 0.9; }
+.editor-main.dragging .pane-divider { background: var(--accent); opacity: 0.9; }
+@media (hover: hover) { .pane-divider:hover { background: var(--accent); opacity: 0.9; } }
 
 /* CodeMirror host + chrome (colors ride the theme variables) */
 .editor-cm { flex: 1; display: flex; min-width: 0; }
@@ -488,7 +492,7 @@ body:has(> .editor-shell:not(.hidden)) > .attribution { margin: 0; padding: 0; h
   align-items: center;
   gap: 5px;
   flex: none;
-  padding: 0 7px 0 3px;
+  padding-inline: 3px 7px;
   font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -504,7 +508,7 @@ body:has(> .editor-shell:not(.hidden)) > .attribution { margin: 0; padding: 0; h
   height: 24px;
   flex: none;
   font-size: 12px;
-  padding: 0 10px 0 6px;
+  padding-inline: 6px 10px;
   border-radius: 99px;
   border: 1px solid var(--border);
   background: var(--panel-2);
@@ -515,12 +519,12 @@ body:has(> .editor-shell:not(.hidden)) > .attribution { margin: 0; padding: 0; h
 .chip .line-no, .person .line-no { color: var(--muted); font-variant-numeric: tabular-nums; }
 .chip .chip-initials { display: none; }
 
-.roster[data-density="avatars"] .roster-chips { gap: 6px 0; padding-left: 6px; }
+.roster[data-density="avatars"] .roster-chips { gap: 6px 0; padding-inline-start: 6px; }
 .roster[data-density="avatars"] .chip {
   width: 26px;
   height: 26px;
   padding: 0;
-  margin-left: -3px;
+  margin-inline-start: -3px;
   justify-content: center;
   border: 1.5px solid var(--c);
   background: color-mix(in srgb, var(--c) 22%, var(--panel));
@@ -535,14 +539,14 @@ body:has(> .editor-shell:not(.hidden)) > .attribution { margin: 0; padding: 0; h
 .roster[data-density="avatars"] .chip > :not(.chip-initials) { display: none; }
 .roster[data-density="avatars"] .chip .chip-initials { display: inline; }
 .roster[data-density="count"] .roster-chips { display: none; }
-.roster[data-density="count"] .roster-more { padding: 0 8px 0 6px; }
+.roster[data-density="count"] .roster-more { padding-inline: 6px 8px; }
 
-.menu.people-menu { left: 0; right: auto; min-width: 230px; max-width: min(320px, 90vw); max-height: min(70vh, 480px); overflow-y: auto; }
+.menu.people-menu { inset-inline: 0 auto; min-width: 230px; max-width: min(320px, 90vw); max-height: min(70vh, 480px); overflow-y: auto; }
 .people-menu h4 { margin: 4px 10px 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); }
 .person { display: flex; align-items: center; gap: 9px; padding: 5px 10px; font-size: 13.5px; white-space: nowrap; }
 .person .person-name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .person .you { color: var(--muted); }
-.person .line-no { margin-left: auto; padding-left: 12px; font-size: 12px; }
+.person .line-no { margin-inline-start: auto; padding-inline-start: 12px; font-size: 12px; }
 
 /* --- auth card --- */
 .auth-card {
@@ -670,7 +674,7 @@ dialog::backdrop { background: var(--backdrop); }
   .editor-shell .sidebar {
     position: absolute;
     top: 0;
-    right: 0;
+    inset-inline-end: 0;
     bottom: 0;
     width: min(320px, 88vw);
     z-index: 15;
@@ -692,7 +696,7 @@ dialog::backdrop { background: var(--backdrop); }
   /* Phone width: the mode switch shows only the current mode, and a tap
      steps to the next one (see initViewMode). */
   .mode-switch .icon-btn[aria-checked="false"] { display: none; }
-  .mode-switch .icon-btn + .icon-btn { border-left: none; }
+  .mode-switch .icon-btn + .icon-btn { border-inline-start: none; }
 }
 
 /* --- touch --------------------------------------------------------------------- */
@@ -707,7 +711,7 @@ dialog::backdrop { background: var(--backdrop); }
   .topbar { gap: 2px; }
   .topbar .icon-btn, .topbar .mode-switch .icon-btn { width: 40px; height: 44px; }
   .topbar .icon-btn svg { width: 20px; height: 20px; }
-  .home-mark { height: 40px; padding: 0 10px; margin-right: 4px; }
+  .home-mark { height: 40px; padding: 0 10px; margin-inline-end: 4px; }
   .home-mark svg { height: 17px; }
   .roster-button { height: 44px; }
   .status-dot { margin: 0 4px; }
@@ -726,6 +730,12 @@ dialog::backdrop { background: var(--backdrop); }
   .pane-divider { position: relative; z-index: 2; }
   .pane-divider::after { content: ""; position: absolute; inset: -14px; }
   .topbar, .menu { -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 16%, transparent); }
+}
+/* The smallest phones (320px): give the title back a little room. */
+@media (pointer: coarse) and (max-width: 350px) {
+  .topbar .icon-btn, .topbar .mode-switch .icon-btn { width: 36px; }
+  .home-mark { padding: 0 8px; margin-inline-end: 2px; }
+  .doc-title { min-width: 1.5rem; }
 }
 
 /* --- instance identity (attribution footer + operator banner) ---------------- */

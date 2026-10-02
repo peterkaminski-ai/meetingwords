@@ -37,12 +37,19 @@ marked.setOptions({ gfm: true, breaks: true, renderer });
 // first run that can, instead of taking the first run it finds.
 const SPACE = /\s/;
 const PUNCT = /[\p{P}\p{S}]/u;
+// The scan below runs to the end of the block. Left at that, text with many
+// tildes and no closer rescans the block once per tilde. A scan that fails
+// proves there is no closer of that length anywhere after its start, so the
+// tail it covered is remembered and any later start inside it fails at once.
+const noCloser: string[] = ["", "", ""];
 marked.use({
   tokenizer: {
     del(src: string) {
       const open = /^(~~?)(?=[^\s~])/.exec(src);
       if (!open) return undefined;
       const fence = open[1].length;
+      const known = noCloser[fence];
+      if (src.length <= known.length && known.endsWith(src)) return undefined;
       for (let i = fence; i < src.length; i++) {
         if (src[i] === "\\") {
           i++;
@@ -64,6 +71,7 @@ marked.use({
         }
         i = end - 1;
       }
+      noCloser[fence] = src;
       return undefined;
     },
   },

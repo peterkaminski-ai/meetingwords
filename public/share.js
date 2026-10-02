@@ -102,7 +102,9 @@ async function initSaveRibbon(instance) {
     moreMenu.close();
     sessionStorage.removeItem(dismissedKey);
     ribbon.hidden = false;
-    document.getElementById(signedIn ? "save-now-btn" : "save-email").focus();
+    // After "check your email" or a full list the ribbon has no field to focus.
+    const target = document.getElementById(signedIn ? "save-now-btn" : "save-email");
+    if (target.offsetParent) target.focus();
   });
   // A session already proves the address: one click, no email round-trip.
   if (signedIn) {
@@ -314,7 +316,7 @@ function startReader() {
     document.querySelector(".editor-shell").classList.add("hidden");
     document.body.append(sidebar);
     sidebar.style.position = "fixed";
-    sidebar.style.right = "0";
+    sidebar.style.insetInlineEnd = "0";
     sidebar.style.top = "var(--topbar-h)";
     sidebar.style.bottom = "0";
   }
