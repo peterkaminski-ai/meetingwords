@@ -91,7 +91,7 @@ export function initMenu(button, menu) {
 /**
  * Make the divider between the editor and preview panes draggable. The split
  * is a percentage stored as a CSS custom property (and in localStorage), so
- * CSS owns the layout. Returns { setOpen } to show/hide the divider when the
+ * CSS owns the layout, including which way the panes run. Returns { setOpen } to show/hide the divider when the
  * preview pane toggles.
  */
 export function initPaneSplit(main, divider) {
@@ -104,8 +104,11 @@ export function initPaneSplit(main, divider) {
     divider.setPointerCapture(down.pointerId);
     main.classList.add("dragging");
     const rect = main.getBoundingClientRect();
+    // Narrow windows stack the panes (styles.css), so the divider moves up and down.
+    const stacked = getComputedStyle(main).flexDirection === "column";
     const onMove = (move) => {
-      const pct = Math.min(80, Math.max(20, ((move.clientX - rect.left) / rect.width) * 100));
+      const along = stacked ? (move.clientY - rect.top) / rect.height : (move.clientX - rect.left) / rect.width;
+      const pct = Math.min(80, Math.max(20, along * 100));
       main.style.setProperty("--split", `${pct}%`);
     };
     const onUp = () => {

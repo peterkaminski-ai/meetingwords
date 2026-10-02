@@ -658,6 +658,12 @@ dialog::backdrop { background: var(--backdrop); }
   .wrap { padding: 16px 12px; }
   .preview { padding: 16px 14px; }
   .editor-cm .cm-scroller { padding: 14px 6px; }
+  /* Split mode stacks: editor above, preview below, each the full width.
+     Side by side, a narrow window leaves two unreadable columns. */
+  .editor-main.split { flex-direction: column; }
+  .editor-main.split .editor-cm, .editor-main.split .preview { min-height: 0; }
+  .editor-main.split .pane-divider { cursor: row-resize; }
+  .editor-main.split.dragging { cursor: row-resize; }
   /* Comments become an overlay drawer instead of a squeezed column. */
   .editor-shell .sidebar {
     position: absolute;
