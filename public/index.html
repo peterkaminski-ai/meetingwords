@@ -6,12 +6,13 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <script>(() => { const t = localStorage.getItem("mw-theme"); document.documentElement.dataset.theme = t === "light" || t === "dark" ? t : matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; })();</script>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+<link rel="icon" href="/icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
 
 <div class="topbar">
   <a class="home-mark" href="/" data-i18n-title="nav.home" title="Home" aria-label="Home">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20z"/><path d="M9.5 21.5v-7h5v7"/></svg>
-    <svg class="home-mark-letters" viewBox="0 0 38 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 19.5 2 5 8.5 14 15 5 15 19.5"/><polyline points="20.5 5 24.5 19.5 28.5 9.5 32.5 19.5 36.5 5"/></svg>
+    <svg class="home-mark-letters" viewBox="1.25 8 29.5 16" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2.75 22 2.75 10 6.75 16.5 10.75 10 10.75 22"/><polyline points="15.25 10 20 22 22.25 14 24.5 22 29.25 10"/></svg>
   </a>
   <span class="brand" data-brand>MeetingWords</span>
   <span class="spacer"></span>
